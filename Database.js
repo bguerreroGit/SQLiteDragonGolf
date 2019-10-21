@@ -31,6 +31,9 @@ export default class Database {
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS courses(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), short_name VARCHAR(10), address VARCHAR(255), city VARCHAR(255), country VARCHAR(255), id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS tees(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), color VARCHAR(10), rating FLOAT, slope INTEGER, course_id INTEGER, hole_1 INTEGER, hole_2 INTEGER, hole_3 INTEGER, hole_4 INTEGER, hole_5 INTEGER, hole_6 INTEGER, hole_7 INTEGER, hole_8 INTEGER, hole_9 INTEGER, hole_10 INTEGER, hole_11 INTEGER, hole_12 INTEGER, hole_13 INTEGER, hole_14 INTEGER, hole_15 INTEGER, hole_16 INTEGER, hole_17 INTEGER, hole_18 INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS holes(id INTEGER PRIMARY KEY AUTOINCREMENT, par INTEGER, hole_number INTEGER, adv INTEGER, handicap INTEGER, handicap_damas INTEGER, course_id INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS players(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), last_name VARCHAR(255), email VARCHAR(255), cellphone VARCHAR(15), ghin_number VARCHAR(10), nick_name VARCHAR(10), handicap INTEGER, strokes INTEGER, photo VARCHAR(200), general_settings_id INTEGER, advantage_settings_id INTEGER, single_nassau_wagers_id INTEGER, extra_bets_id INTEGER, team_nassau_wagers INTEGER, best_ball_teams INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), last_name VARCHAR(255), email VARCHAR(255), nick_name VARCHAR(10), cellphone VARCHAR(15), language VARCHAR(10), ghin_number VARCHAR(10), photo VARCHAR(200), general_settings_id INTEGER, single_nassau_wagers_id INTEGER, team_nassau_wagers_id INTEGER, extra_bets_id INTEGER, stableford_settings_id INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS general_settings(id INTEGER PRIMARY KEY AUTOINCREMENT, rabbit_1_6 INTEGER, rabbit_7_12 INTEGER, rabbit_13_18 INTEGER, medal_play_f9 INTEGER, medal_play_b9 INTEGER, medal_play_18 INTEGER, skins INTEGER, skins_carry_over TINYINT, lowed_adv_on_f9 TINYINT , id_sync INTEGER, ultimate_sync TIMESTAMP)');
                             }).then(() => {
                                 resolve(db);
                                 //console.log("Table created successfully");
@@ -231,38 +234,6 @@ export default class Database {
         });
     }
 
-    listHoleTee() {
-        return new Promise((resolve) => {
-            const hole_tee = [];
-            this.initDB().then((db) => {
-                db.transaction((tx) => {
-                    tx.executeSql('SELECT ht.id, ht.hole_id, ht.tee_id FROM hole_tee ht', []).then(([tx, results]) => {
-                        console.log("Query completed");
-                        var len = results.rows.length;
-                        for (let i = 0; i < len; i++) {
-                            let row = results.rows.item(i);
-                            console.log(`ID: ${row.id}, HOLE: ${row.hole_id}, TEE: ${row.tee_id}`);
-                            const { id, hole_id, tee_id } = row;
-                            hole_tee.push({
-                                id,
-                                hole_id,
-                                tee_id
-                            });
-                        }
-                        console.log(hole_tee);
-                        resolve(hole_tee);
-                    });
-                }).then((result) => {
-                    this.closeDatabase(db);
-                }).catch((err) => {
-                    console.log(err);
-                });
-            }).catch((err) => {
-                console.log(err);
-            });
-        });
-    }
-
     holesByCourseId(course_id) {
         console.log(course_id);
         let holes=[];
@@ -282,7 +253,6 @@ export default class Database {
                                 hole_number,
                                 adv,
                                 handicap,
-                                yards: '126',
                                 handicap_damas,
                                 course_id,
                                 id_sync,
@@ -290,6 +260,52 @@ export default class Database {
                             });
                         }
                         resolve(holes);
+                    });
+                }).then((result) => {
+                    this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    listPlayers(){
+        let players = [];
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT * FROM players', []).then(([tx, results]) => {
+                        console.log(results);
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            console.log(`Hole ID: ${row.id}`);
+                            const { id, name, last_name, email, cellphone, ghin_number, nick_name, handicap, strokes, photo, general_settings_id, advantage_settings_id, single_nassau_wagers_id, extra_bets_id, team_nassau_wagers, best_ball_teams, id_sync, ultimate_sync } = row;
+                            players.push({
+                                id, 
+                                name, 
+                                last_name, 
+                                email, 
+                                cellphone, 
+                                ghin_number,
+                                nick_name, 
+                                handicap, 
+                                strokes,
+                                photo, 
+                                general_settings_id, 
+                                advantage_settings_id, 
+                                single_nassau_wagers_id, 
+                                extra_bets_id, 
+                                team_nassau_wagers, 
+                                best_ball_teams,
+                                id_sync,
+                                ultimate_sync,
+                            });
+                        }
+                        resolve(players);
                     });
                 }).then((result) => {
                     this.closeDatabase(db);
@@ -371,6 +387,28 @@ export default class Database {
         });
     }
 
+    generalSettingsById(id) {
+        console.log(id);
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT * FROM general_settings WHERE id = ?', [id]).then(([tx, results]) => {
+                        console.log(results);
+                        if (results.rows.length > 0) {
+                            let row = results.rows.item(0);
+                            resolve(row);
+                        }
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
 
     addCourse(course) {
         return new Promise((resolve) => {
@@ -509,20 +547,33 @@ export default class Database {
         });
     }
 
-    AddHolesAndTeeById(tee_id, holes){
-        let values=[];
-        for (var i = 0; i < 18; i++) {
-            values.push(holes[i].id);
-            values.push(tee_id);
-        }
+    addPlayers(player){
         return new Promise((resolve) => {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
-                    tx.executeSql('INSERT INTO hole_tee(hole_id, tee_id) VALUES (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?),(?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)', values).then(([tx, results]) => {
+                    tx.executeSql('INSERT INTO players(name, last_name, email, cellphone, ghin_number, nick_name, handicap, strokes, photo, general_settings_id, advantage_settings_id, single_nassau_wagers_id, extra_bets_id, team_nassau_wagers, best_ball_teams, id_sync, ultimate_sync) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [player.name, player.last_name, player.email, player.cellphone, player.ghin_number, player.nick_name, player.handicap, player.strokes, player.photo, player.general_settings_id, player.advantage_settings_id, player.single_nassau_wagers_id, player.extra_bets_id, player.team_nassau_wagers, player.best_ball_teams, player.id_sync, player.ultimate_sync]).then(([tx, results]) => {
                         resolve(results);
                     });
                 }).then((result) => {
-                    this.closeDatabase(db);
+                    // this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    addGeneralSettings(setting){
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('INSERT INTO general_settings(rabbit_1_6, rabbit_7_12, rabbit_13_18, medal_play_f9, medal_play_b9, medal_play_18, skins, skins_carry_over, lowed_adv_on_f9, id_sync, ultimate_sync) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [setting.rabbit_1_6, setting.rabbit_7_12, setting.rabbit_13_18, setting.medal_play_f9, setting.medal_play_b9, setting.medal_play_18, setting.skins, setting.skins_carry_over, setting.lowed_adv_on_f9, setting.id_sync, setting.ultimate_sync]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    // this.closeDatabase(db);
                 }).catch((err) => {
                     console.log(err);
                 });

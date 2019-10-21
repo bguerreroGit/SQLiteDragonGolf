@@ -35,10 +35,16 @@ import AddCampoCompleteScreen from './screens/AddCampoCompleteScreen';
 import AddTeeCompleteScreen from './screens/AddTeeCompleteScreen';
 import TeesCompleteScreen from './screens/TeesCompleteScreen';
 import ConfigureHolesScreen from './screens/ConfigureHolesScreen';
+import PlayersScreen from './screens/PlayersScreen';
+import AddPlayersScreen from './screens/AddPlayerScreen';
+import ConfigurePlayersScreen from './screens/ConfigurePlayersScreen';
 
 const RootStack = createStackNavigator(
   {
     Home: HomeScreen,
+    Players: PlayersScreen,
+    AddPlayers: AddPlayersScreen,
+    ConfigurePlayers: ConfigurePlayersScreen,
     Holes: HolesScreen,
     AddHole: AddHoleScreen,
     DetallesHole: DetallesHoleScreen,
@@ -48,7 +54,6 @@ const RootStack = createStackNavigator(
     AddCampo: AddCampoScreen,
     EditarCampo: EditarCampoScreen,
     Tees: TeesScreen,
-   // AddTee: AddTeeScreen,
     DetallesTee: DetallesTeeScreen,
     EditarTee: EditarTeeScreen,
     CampoComplete: CampoCompleteScreen,

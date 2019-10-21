@@ -13,16 +13,6 @@ export default class HomeScreen extends Component {
     super(props);
     this.state = {
     };
-    db.listHoleTee()
-      .then(data => {
-        console.log('Campos********************', data);
-      })
-      .catch(err => {
-        console.log(err);
-        this.setState = {
-          isLoading: false,
-        };
-      });
   }
 
   render() {
@@ -51,6 +41,12 @@ export default class HomeScreen extends Component {
           title="Courses Complete Process"
           color="#0000ff"
           onPress={() => this.props.navigation.navigate('CampoComplete')}
+        />
+        <View style={{ height: 20 }} />
+        <Button
+          title="Players"
+          color="#0000ff"
+          onPress={() => this.props.navigation.navigate('Players')}
         />
       </View>
     );

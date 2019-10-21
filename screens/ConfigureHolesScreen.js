@@ -14,13 +14,13 @@ export default class ConfigureHolesScreen extends Component {
         let holes = [];
         for (var i = 0; i < 18; i++) {
             holes.push({
-                par: '5',
+                par: '',
                 hole_number: (i + 1).toString(),
-                adv: '1',
-                handicap: '8',
-                handicap_damas: '10',
+                adv: '',
+                handicap: '',
+                handicap_damas: '',
                 course_id: courseId,
-                yards: '145',
+                yards: '',
                 id_sync: null,
                 ultimate_sync: moment().format('YYYY-MM-DD HH:mm:ss'),
             });
