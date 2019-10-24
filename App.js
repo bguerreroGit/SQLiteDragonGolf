@@ -38,12 +38,15 @@ import ConfigureHolesScreen from './screens/ConfigureHolesScreen';
 import PlayersScreen from './screens/PlayersScreen';
 import AddPlayersScreen from './screens/AddPlayerScreen';
 import ConfigurePlayersScreen from './screens/ConfigurePlayersScreen';
+import EditPlayersScreen from './screens/EditPlayerScreen';
+import SettingsScreen from './screens/SettingsScreen';
 
 const RootStack = createStackNavigator(
   {
     Home: HomeScreen,
     Players: PlayersScreen,
     AddPlayers: AddPlayersScreen,
+    EditPlayer: EditPlayersScreen, 
     ConfigurePlayers: ConfigurePlayersScreen,
     Holes: HolesScreen,
     AddHole: AddHoleScreen,
@@ -61,6 +64,7 @@ const RootStack = createStackNavigator(
     AddTeeComplete: AddTeeCompleteScreen,
     TeesComplete: TeesCompleteScreen,
     ConfigureHoles: ConfigureHolesScreen,
+    Settings: SettingsScreen,
   },
   {
     initialRouteName: 'Home',

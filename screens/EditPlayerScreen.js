@@ -7,71 +7,103 @@ import moment from "moment";
 
 const db = new Database();
 
-export default class AddPlayersScreen extends Component {
+export default class EditPlayersScreen extends Component {
     constructor(props) {
         super(props);
+        const player = props.navigation.state.params.player;
         this.state = {
-            player: {
-                name: 'Jugador',
-                last_name: 'Apellido',
-                email: 'j@gmail.com',
-                cellphone: '444 333 4807',
-                ghin_number: 'T327347',
-                nick_name: 'J1', 
-                handicap: '26', 
-                strokes: '4',
-                photo: '1355665.jpg',
-                general_settings_id: null,
-                advantage_settings_id: null,
-                single_nassau_wagers_id: null,
-                extra_bets_id: null,
-                team_nassau_wagers_id: null,
-                best_ball_teams_id: null,
-                id_sync: '2',
-                ultimate_sync: '',
-            },
+            player: player,
             general_settings: {
-                rabbit_1_6: '100', 
-                rabbit_7_12: '100', 
-                rabbit_13_18: '100', 
-                medal_play_f9: '100',
-                medal_play_b9: '100',
-                medal_play_18: '100',
-                skins: '100', 
-                skins_carry_over: 0, 
-                lowed_adv_on_f9: 0, 
-                id_sync: '', 
+                rabbit_1_6: '',
+                rabbit_7_12: '',
+                rabbit_13_18: '',
+                medal_play_f9: '',
+                medal_play_b9: '',
+                medal_play_18: '',
+                skins: '100',
+                skins_carry_over: 0,
+                lowed_adv_on_f9: 0,
+                id_sync: '',
                 ultimate_sync: '', 
             },
             single_nassau_wagers: {
-                automatic_presses_every: '2', 
-                front_9: '100',
-                back_9: '100',
-                match: '100',
-                medal: '200',
+                automatic_presses_every: '',
+                front_9: '',
+                back_9: '',
+                match: '',
+                medal: '',
                 total_18: '',
-                carry: '200',
-                id_sync: '', 
+                carry: '',
+                id_sync: '',
                 ultimate_sync: '',
             },
             team_nassau_wagers: {
-                automatic_presses_every: '2',
-                front_9: '100', 
-                back_9: '100', 
+                automatic_presses_every: '',
+                front_9: '',
+                back_9: '',
+                match: '',
                 total_18: '',
-                match: '100', 
-                carry: '100', 
-                medal: '100', 
-                who_gets_the_adv_strokes: 'Hi Hcp',
-                id_sync: '', 
+                carry: '',
+                medal: '',
+                who_gets_the_adv_strokes: '',
+                id_sync: '',
                 ultimate_sync: '',
             },
             isLoading: false,
         };
     }
     static navigationOptions = {
-        title: 'Agregar Jugador',
+        title: 'Editar Jugador',
     };
+    componentDidMount() {
+        const { player } = this.props.navigation.state.params;
+        db.generalSettingsById(player.general_settings_id).then((result) => {
+            console.log('============================== GENERAL SETTINGS ======================= ');
+            console.log(result);
+            console.log('============================== END GENERAL SETTINGS ======================= ');
+                this.setState({
+                    general_settings: result,
+                    haveHoles: true,
+                });
+        }).catch((err) => {
+            console.log(err);
+            this.setState({
+                isLoading: false,
+            });
+        })
+        
+        db.singleSettingsById(player.single_nassau_wagers_id).then((result) => {
+            console.log('============================== SINGLE SETTINGS ======================= ');
+            console.log(result);
+            console.log('============================== END SINGLE SETTINGS ======================= ');
+            this.setState({
+                single_nassau_wagers: result,
+                haveHoles: true,
+            });
+        }).catch((err) => {
+            console.log(err);
+            this.setState({
+                isLoading: false,
+            });
+        })
+        
+        db.teamSettingsById(player.team_nassau_wagers_id).then((result) => {
+            console.log('============================== TEAM SETTINGS ======================= ');
+            console.log(result);
+            console.log('Match')
+            console.log('============================== END TEAM SETTINGS ======================= ');
+            this.setState({
+                team_nassau_wagers: result,
+                haveHoles: true,
+            });
+        }).catch((err) => {
+            console.log(err);
+            this.setState({
+                isLoading: false,
+            });
+        }) 
+
+    }
 
     updateTextInput = (text, field) => {
         const state = this.state;
@@ -99,68 +131,52 @@ export default class AddPlayersScreen extends Component {
     }
     toggleSwitch = (value, field) => {
         const state = this.state;
-        state.general_settings[field] = value==true ? 1 : 0;
+        state.general_settings[field] = value == true ? 1 : 0;
         state.general_settings.ultimate_sync = moment().format('YYYY-MM-DD HH:mm:ss');
         this.setState(state);
     }
-    savePlayer() {
+    updatePlayer() {
         this.setState({
             isLoading: true,
         });
         let player = this.state.player;
-        let dataGeneralSetting=this.state.general_settings;
-        let single=this.state.single_nassau_wagers;
-        let team=this.state.team_nassau_wagers;
-
-        db.addGeneralSettings(dataGeneralSetting).then((result) => {
-            console.log('================== GENERAL SETTING ====================================');
+        let dataGeneralSetting = this.state.general_settings;
+        let single = this.state.single_nassau_wagers;
+        let team = this.state.team_nassau_wagers;
+        db.updatePlayer(player).then((result) => {
+            console.log('================== PLAYER UPDATE ====================================');
+            console.log(result);
+            console.log('================== FINAL DE PLAYER UPDATE ====================================');
+        }).catch(error => {
+            console.log(error);
+        })
+        db.updateGeneralSetting(dataGeneralSetting).then((result) => {
+            console.log('================== GENERAL SETTING UPDATE ====================================');
             console.log(result);
             console.log('ID DE GENERAL SETTING: ', result.insertId);
-            console.log('================== FINAL DE GENERAL SETTING ====================================');
-            player.general_settings_id = result.insertId;
-            db.addSingleNassauSettings(single).then((result) => {
-                console.log('================== SINGLE SETTING ====================================');
-                console.log(result);
-                console.log('ID DE SINGLE SETTING: ', result.insertId);
-                console.log('================== FINAL DE SINGLE SETTING ====================================');
-                player.single_nassau_wagers_id=result.insertId; 
-                db.addTeamNassauSettings(team).then((resultado) => {
-                    console.log('=================TEAM ====================================');
-                    console.log(resultado);
-                    console.log('ID DE TEAM: ', resultado.insertId);
-                    console.log('================== FINAL TEAM ====================================');
-                    //Alert.alert(JSON.stringify(result));
-                    player.team_nassau_wagers_id=resultado.insertId;
-                    db.addPlayers(player).then((resultado) => {
-                        console.log('================== PLAYER ====================================');
-                        console.log(resultado);
-                        console.log('ID DE PLAYER: ', resultado.insertId);
-                        console.log('================== FINAL DE PLAYER ====================================');
-                        //Alert.alert(JSON.stringify(result));
-                        this.setState({
-                            isLoading: false,
-                        });
-                        this.props.navigation.goBack();
-                    }).catch((err) => {
-                        console.log(err);
-                        this.setState({
-                            isLoading: false,
-                        });
-                    })   
-                }).catch((err) => {
-                    console.log(err);
-                    this.setState({
-                        isLoading: false,
-                    });
-                })   
-            }).catch(error => {
-                console.log(error);
-            })
-
+            console.log('================== FINAL DE GENERAL SETTING UPDATE ====================================');
         }).catch(err => {
             console.log(err);
         })
+        
+        db.updateSingleNassauSettings(single).then((result) => {
+            console.log('================== SINGLE SETTING UPDATE ====================================');
+            console.log(result);
+            console.log('ID DE SINGLE SETTING: ', result.insertId);
+            console.log('================== FINAL DE SINGLE SETTING UPDATE ====================================');
+        }).catch(error => {
+            console.log(error);
+        })
 
+        db.updateTeamNassauSettings(team).then((result) => {
+            console.log('================== SINGLE TEAM UPDATE ====================================');
+            console.log(result);
+            console.log('ID DE SINGLE TEAM: ', result.insertId);
+            console.log('================== FINAL DE SINGLE TEAM UPDATE ====================================');
+            this.props.navigation.goBack();
+        }).catch(error => {
+            console.log(error);
+        })
 
     }
     render() {
@@ -218,14 +234,14 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Handicap'}
-                        value={this.state.player.handicap}
+                        value={this.state.player.handicap.toString()}
                         onChangeText={(text) => this.updateTextInput(text, 'handicap')}
                     />
                 </View>
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Strokes for this player'}
-                        value={this.state.player.strokes}
+                        value={this.state.player.strokes.toString()}
                         onChangeText={(text) => this.updateTextInput(text, 'strokes')}
                     />
                 </View>
@@ -242,7 +258,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Rabbit 1 - 6'}
-                        value={this.state.general_settings.rabbit_1_6}
+                        value={this.state.general_settings.rabbit_1_6.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateGenSettTextInput(text, 'rabbit_1_6')}
                     />
@@ -250,7 +266,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Rabbit 7 - 12'}
-                        value={this.state.general_settings.rabbit_7_12}
+                        value={this.state.general_settings.rabbit_7_12.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateGenSettTextInput(text, 'rabbit_7_12')}
                     />
@@ -258,7 +274,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Rabbit 13 - 18'}
-                        value={this.state.general_settings.rabbit_13_18}
+                        value={this.state.general_settings.rabbit_13_18.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateGenSettTextInput(text, 'rabbit_13_18')}
                     />
@@ -266,7 +282,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Rabbit Medal Plays F9'}
-                        value={ this.state.general_settings.medal_play_f9 }
+                        value={this.state.general_settings.medal_play_f9.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateGenSettTextInput(text, 'medal_play_f9')}
                     />
@@ -274,7 +290,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Medal Play B9'}
-                        value={this.state.general_settings.medal_play_b9}
+                        value={this.state.general_settings.medal_play_b9.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateGenSettTextInput(text, 'medal_play_b9')}
                     />
@@ -282,7 +298,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Medal Play 18'}
-                        value={this.state.general_settings.medal_play_18}
+                        value={this.state.general_settings.medal_play_18.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateGenSettTextInput(text, 'medal_play_18')}
                     />
@@ -290,7 +306,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Skins'}
-                        value={this.state.general_settings.skins}
+                        value={this.state.general_settings.skins.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateGenSettTextInput(text, 'skins')}
                     />
@@ -321,7 +337,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Automatic Presses Every'}
-                        value={this.state.single_nassau_wagers.automatic_presses_every}
+                        value={this.state.single_nassau_wagers.automatic_presses_every.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateSingSettTextInput(text, 'automatic_presses_every')}
                     />
@@ -329,7 +345,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Front 9'}
-                        value={this.state.single_nassau_wagers.front_9}
+                        value={this.state.single_nassau_wagers.front_9.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateSingSettTextInput(text, 'front_9')}
                     />
@@ -337,7 +353,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Back 9'}
-                        value={this.state.single_nassau_wagers.back_9}
+                        value={this.state.single_nassau_wagers.back_9.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateSingSettTextInput(text, 'back_9')}
                     />
@@ -345,7 +361,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Match'}
-                        value={this.state.single_nassau_wagers.match}
+                        value={this.state.single_nassau_wagers.match.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateSingSettTextInput(text, 'match')}
                     />
@@ -353,7 +369,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Carry'}
-                        value={this.state.single_nassau_wagers.carry}
+                        value={this.state.single_nassau_wagers.carry.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateSingSettTextInput(text, 'carry')}
                     />
@@ -361,7 +377,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Medal'}
-                        value={this.state.single_nassau_wagers.medal}
+                        value={this.state.single_nassau_wagers.medal.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateSingSettTextInput(text, 'medal')}
                     />
@@ -372,7 +388,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Automatic Presses Every'}
-                        value={this.state.team_nassau_wagers.automatic_presses_every}
+                        value={this.state.team_nassau_wagers.automatic_presses_every.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateTeamSettTextInput(text, 'automatic_presses_every')}
                     />
@@ -380,7 +396,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Front 9'}
-                        value={this.state.team_nassau_wagers.front_9}
+                        value={this.state.team_nassau_wagers.front_9.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateTeamSettTextInput(text, 'front_9')}
                     />
@@ -388,7 +404,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Back 9'}
-                        value={this.state.team_nassau_wagers.back_9}
+                        value={this.state.team_nassau_wagers.back_9.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateTeamSettTextInput(text, 'back_9')}
                     />
@@ -396,7 +412,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Match'}
-                        value={this.state.team_nassau_wagers.match}
+                        value={this.state.team_nassau_wagers.match.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateTeamSettTextInput(text, 'match')}
                     />
@@ -404,7 +420,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Carry'}
-                        value={this.state.team_nassau_wagers.carry}
+                        value={this.state.team_nassau_wagers.carry.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateTeamSettTextInput(text, 'carry')}
                     />
@@ -412,7 +428,7 @@ export default class AddPlayersScreen extends Component {
                 <View style={styles.subContainer}>
                     <TextInput
                         placeholder={'Medal'}
-                        value={this.state.team_nassau_wagers.medal}
+                        value={this.state.team_nassau_wagers.medal.toString()}
                         keyboardType={'numeric'}
                         onChangeText={(text) => this.updateTeamSettTextInput(text, 'medal')}
                     />
@@ -429,8 +445,8 @@ export default class AddPlayersScreen extends Component {
                     <Button
                         large
                         leftIcon={{ name: 'save' }}
-                        title='Save'
-                        onPress={() => this.savePlayer()} />
+                        title='Update'
+                        onPress={() => this.updatePlayer()} />
                 </View>
             </ScrollView>
         );

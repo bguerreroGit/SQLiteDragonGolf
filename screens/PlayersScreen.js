@@ -71,7 +71,7 @@ export default class PlayersScreen extends Component {
             subtitle={item.nick_name}
             leftIcon={{ name: 'check-circle' }}
             onPress={() => {
-                this.props.navigation.navigate('ConfigurePlayers');
+                this.props.navigation.navigate('EditPlayer', { player: item });
             }}
             chevron
             bottomDivider
