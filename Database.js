@@ -29,13 +29,15 @@ export default class Database {
                             console.log('Database OPEN');
                             db.transaction((tx) => {
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS courses(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), short_name VARCHAR(10), address VARCHAR(255), city VARCHAR(255), country VARCHAR(255), id_sync INTEGER, ultimate_sync TIMESTAMP)');
-                                tx.executeSql('CREATE TABLE IF NOT EXISTS tees(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), color VARCHAR(10), rating FLOAT, slope INTEGER, course_id INTEGER, hole_1 INTEGER, hole_2 INTEGER, hole_3 INTEGER, hole_4 INTEGER, hole_5 INTEGER, hole_6 INTEGER, hole_7 INTEGER, hole_8 INTEGER, hole_9 INTEGER, hole_10 INTEGER, hole_11 INTEGER, hole_12 INTEGER, hole_13 INTEGER, hole_14 INTEGER, hole_15 INTEGER, hole_16 INTEGER, hole_17 INTEGER, hole_18 INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
-                                tx.executeSql('CREATE TABLE IF NOT EXISTS holes(id INTEGER PRIMARY KEY AUTOINCREMENT, par INTEGER, hole_number INTEGER, adv INTEGER, handicap INTEGER, handicap_damas INTEGER, course_id INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS tees(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), color VARCHAR(10), rating FLOAT, slope INTEGER, course_id INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS holes(id INTEGER PRIMARY KEY AUTOINCREMENT, par INTEGER, hole_number INTEGER, adv INTEGER, yards INTEGER, tee_id INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS players(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), last_name VARCHAR(255), email VARCHAR(255), cellphone VARCHAR(15), ghin_number VARCHAR(10), nick_name VARCHAR(10), handicap INTEGER, strokes INTEGER, photo VARCHAR(200), general_settings_id INTEGER, advantage_settings_id INTEGER, single_nassau_wagers_id INTEGER, extra_bets_id INTEGER, team_nassau_wagers_id INTEGER, best_ball_teams_id INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), last_name VARCHAR(255), email VARCHAR(255), nick_name VARCHAR(10), cellphone VARCHAR(15), language VARCHAR(10), handicap, ghin_number VARCHAR(10), photo VARCHAR(200), general_settings_id INTEGER, single_nassau_wagers_id INTEGER, team_nassau_wagers_id INTEGER, extra_bets_id INTEGER, stableford_settings_id INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS general_settings(id INTEGER PRIMARY KEY AUTOINCREMENT, rabbit_1_6 INTEGER, rabbit_7_12 INTEGER, rabbit_13_18 INTEGER, medal_play_f9 INTEGER, medal_play_b9 INTEGER, medal_play_18 INTEGER, skins INTEGER, skins_carry_over TINYINT, lowed_adv_on_f9 TINYINT , id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS single_nassau_wagers(id INTEGER PRIMARY KEY AUTOINCREMENT, automatic_presses_every INTEGER, front_9 INTEGER, back_9 INTEGER, match INTEGER, total_18 INTEGER, carry INTEGER, medal INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS team_nassau_wagers(id INTEGER PRIMARY KEY AUTOINCREMENT, automatic_presses_every INTEGER, front_9 INTEGER, back_9 INTEGER, match INTEGER, total_18 INTEGER, carry INTEGER, medal INTEGER, who_gets_the_adv_strokes VARCHAR(20), id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS rounds(id INTEGER PRIMARY KEY AUTOINCREMENT,course_id INTEGER, hcp_adjustment FLOAT, online_key VARCHAR(250), starting_hole INTEGER, adv_b9_f9 TINYINT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS round_members(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, tee_id INTEGER, round_id INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                             }).then(() => {
                                 resolve(db);
                                 //console.log("Table created successfully");
@@ -154,7 +156,7 @@ export default class Database {
                         for (let i = 0; i < len; i++) {
                             let row = results.rows.item(i);
                             console.log(`Tee ID: ${row.id}, Tee Name: ${row.name}`);
-                            const { id, name, color, rating, slope, course_id, hole_1, hole_2, hole_3, hole_4, hole_5, hole_6, hole_7, hole_8, hole_9, hole_10, hole_11, hole_12, hole_13, hole_14, hole_15, hole_16, hole_17, hole_18, id_sync, ultimate_sync } = row;
+                            const { id, name, color, rating, slope, course_id, id_sync, ultimate_sync } = row;
                             tees.push({
                                 id,
                                 name,
@@ -162,24 +164,6 @@ export default class Database {
                                 rating,
                                 slope,
                                 course_id,
-                                hole_1, 
-                                hole_2, 
-                                hole_3, 
-                                hole_4, 
-                                hole_5, 
-                                hole_6, 
-                                hole_7, 
-                                hole_8, 
-                                hole_9, 
-                                hole_10, 
-                                hole_11, 
-                                hole_12, 
-                                hole_13, 
-                                hole_14, 
-                                hole_15, 
-                                hole_16, 
-                                hole_17, 
-                                hole_18,
                                 id_sync,
                                 ultimate_sync
                             });
@@ -236,27 +220,25 @@ export default class Database {
         });
     }
 
-    holesByCourseId(course_id) {
-        console.log(course_id);
+    holesByTeeId(tee_id) {
         let holes=[];
         return new Promise((resolve) => {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
-                    tx.executeSql('SELECT * FROM holes WHERE  course_id= ?', [course_id]).then(([tx, results]) => {
+                    tx.executeSql('SELECT * FROM holes WHERE  tee_id= ?', [tee_id]).then(([tx, results]) => {
                         console.log(results);
                         var len = results.rows.length;
                         for (let i = 0; i < len; i++) {
                             let row = results.rows.item(i);
                             console.log(`Hole ID: ${row.id}`);
-                            const { id, par, hole_number, adv, handicap, handicap_damas, course_id, id_sync, ultimate_sync } = row;
+                            const { id, par, hole_number, adv, yards, tee_id, id_sync, ultimate_sync } = row;
                             holes.push({
                                 id,
                                 par,
                                 hole_number,
                                 adv,
-                                handicap,
-                                handicap_damas,
-                                course_id,
+                                yards,
+                                tee_id,
                                 id_sync,
                                 ultimate_sync,
                             });
@@ -541,16 +523,15 @@ export default class Database {
             values.push(h.par);
             values.push(h.hole_number);
             values.push(h.adv);
-            values.push(h.handicap);
-            values.push(h.handicap_damas);
-            values.push(h.course_id);
+            values.push(h.yards);
+            values.push(h.tee_id);
             values.push(h.id_sync);
             values.push(h.ultimate_sync);
         });
         return new Promise((resolve) => {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
-                    tx.executeSql('INSERT INTO holes(par, hole_number, adv, handicap, handicap_damas, course_id, id_sync, ultimate_sync) VALUES (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?)', values).then(([tx, results]) => {
+                    tx.executeSql('INSERT INTO holes(par, hole_number, adv, yards, tee_id, id_sync, ultimate_sync) VALUES (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?)', values).then(([tx, results]) => {
                         resolve(results);
                     });
                 }).then((result) => {
@@ -569,10 +550,11 @@ export default class Database {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
                     holes.forEach(h => {
-                        tx.executeSql('UPDATE holes SET par= ?, adv= ?, handicap= ?, handicap_damas= ?, ultimate_sync= ? WHERE id = ?', [h.par, h.adv, h.handicap, h.handicap_damas, h.ultimate_sync, h.id]).then(([tx, results]) => { });
+                        tx.executeSql('UPDATE holes SET par= ?, adv= ?, yards= ?, ultimate_sync= ? WHERE id = ?', [h.par, h.adv, h.yards, h.ultimate_sync, h.id]).then(([tx, results]) => { 
+                            resolve(results);
+                        });
                     });
                 }).then((result) => {
-                    resolve(result);
                 }).catch((err) => {
                     console.log(err);
                 });

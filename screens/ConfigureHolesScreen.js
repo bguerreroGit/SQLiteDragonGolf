@@ -10,31 +10,26 @@ const db = new Database();
 export default class ConfigureHolesScreen extends Component {
     constructor(props) {
         super(props);
-        const { tee, courseId } = props.navigation.state.params;
+        const { tee } = props.navigation.state.params;
         let holes = [];
         for (var i = 0; i < 18; i++) {
             holes.push({
                 par: '',
                 hole_number: (i + 1).toString(),
                 adv: '',
-                handicap: '',
-                handicap_damas: '',
-                course_id: courseId,
+                tee_id: tee.id,
                 yards: '',
                 id_sync: null,
                 ultimate_sync: moment().format('YYYY-MM-DD HH:mm:ss'),
             });
         }
         this.state = {
-           holes,
-           tee,
-           courseId: courseId, 
+           holes, 
            haveHoles: false,
            isLoading: false,
         };
         console.log('======================= PROPS CONFIGURE HOLES ===========================');
-        console.log('Tee id: ', tee);
-        console.log('Course id: ',courseId);
+        console.log('Tee id: ', tee.id);
         console.log('======================= END PROPS CONFIGURE HOLES ===========================');
     }
     static navigationOptions = ({ navigation }) => {
@@ -44,8 +39,8 @@ export default class ConfigureHolesScreen extends Component {
     };
 
   componentDidMount() {
-      const { courseId } = this.props.navigation.state.params;
-      db.holesByCourseId(courseId).then((result) => {
+      const { tee } = this.props.navigation.state.params;
+      db.holesByTeeId(tee.id).then((result) => {
           console.log('============================== HOLES POR CAMPO ======================= ');
           console.log(result);
           console.log('longuitud del arreglo ', result.length);
@@ -65,31 +60,25 @@ export default class ConfigureHolesScreen extends Component {
   }
     updateTextInput = (text, field, index) => {
         const holes = this.state.holes;
-        const tee=this.state.tee;
         holes[index][field] = text;
-        holes[index]['ultimate_sync'] = moment().format('YYYY-MM-DD HH:mm:ss');
+        holes[index].ultimate_sync = moment().format('YYYY-MM-DD HH:mm:ss');
         this.setState({
             holes,
         });
     }
-    updateTextInputYards = (text, hole) => {
-        const tee = this.state.tee;
-        tee[hole] = text;
-        this.setState({
-            tee,
-        });
-    }
 
     saveHolesAndTee() {
-        const { holes, course_id }=this.state;
-        if(this.state.haveHoles=false){
+        const { holes }=this.state;
+        const { tee } = this.props.navigation.state.params;
+        if(this.state.haveHoles==false){
+            alert('Add 18 HOLES');
             db.add18Holes(holes).then((result) => {
                 console.log(result);
             }).catch(error => {
                 console.log(error);
             })
         }else {
-            db.update18Holes(holes, course_id).then((result) => {
+            db.update18Holes(holes, tee.id).then((result) => {
                 console.log('======================== Resultado update tee ====================');
                 console.log(result);
                 console.log('======================== END Resultado update tee ====================');
@@ -97,19 +86,6 @@ export default class ConfigureHolesScreen extends Component {
                 console.log(error);
             })
         }
-        const tee=this.state.tee;
-        tee['ultimate_sync']=moment().format('YYYY-MM-DD HH:mm:ss');
-        db.updateYardsInTee(tee).then((resultado) => {
-            console.log('======================== Resultado update tee ====================');
-            console.log(resultado);
-            console.log('======================== END Resultado update tee ====================');
-            if (resultado.rowsAffected> 0){
-                Alert.alert('Cambio exitoso', 'Todo se ha guaradado de manera correcta');
-                this.props.navigation.goBack();
-            }
-        }).catch( error => {
-            console.log(error);
-        });
     }
     render() {
         if (this.state.isLoading) {
@@ -136,16 +112,6 @@ export default class ConfigureHolesScreen extends Component {
                     <View style={{ width: '15%' }}>
                         <Text>
                             ADV
-                        </Text>
-                    </View>
-                    <View style={{ width: '15%' }}>
-                        <Text>
-                            HCP
-                        </Text>
-                    </View>
-                    <View style={{ width: '15%' }}>
-                        <Text>
-                            HCP D
                         </Text>
                     </View>
                     <View style={{ width: '15%' }}>
@@ -183,24 +149,8 @@ export default class ConfigureHolesScreen extends Component {
                                             <TextInput
                                                 style={{ height: 35, width: 40, borderWidth: 1, borderColor: 'red' }}
                                                 keyboardType={'numeric'}
-                                                onChangeText={(text) => this.updateTextInput(text, 'handicap', index)}
-                                                value={this.state.holes[index].handicap.toString()}
-                                            />
-                                        </View>
-                                        <View style={{ width: '15%' }}>
-                                            <TextInput
-                                                style={{ height: 35, width: 40, borderWidth: 1, borderColor: 'red' }}
-                                                keyboardType={'numeric'}
-                                                onChangeText={(text) => this.updateTextInput(text, 'handicap_damas', index)}
-                                                value={this.state.holes[index].handicap_damas.toString()}
-                                            />
-                                        </View>
-                                        <View style={{ width: '15%' }}>
-                                            <TextInput
-                                                style={{ height: 35, width: 40, borderWidth: 1, borderColor: 'red' }}
-                                                keyboardType={'numeric'}
-                                                onChangeText={(text) => this.updateTextInputYards(text, 'hole_' + hole.hole_number)}
-                                                value={this.state.tee['hole_' + hole.hole_number] == null ? '' : this.state.tee['hole_' + hole.hole_number].toString()}
+                                                onChangeText={(text) => this.updateTextInput(text, 'yards', index)}
+                                                value={this.state.holes[index].yards.toString()}
                                             />
                                         </View>
                                     </View> 
