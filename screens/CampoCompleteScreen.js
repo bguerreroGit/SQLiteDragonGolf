@@ -68,6 +68,25 @@ export default class CamposCompleteScreen extends Component {
             title={item.short_name}
             subtitle={item.name}
             leftIcon={{ name: 'check-circle' }}
+            onLongPress={() => {
+                Alert.alert(
+                    'Acciones',
+                    'Eliga una opción',
+                    [
+                        {
+                            text: 'Editar', onPress: () => this.props.navigation.navigate('EditarCampo', {
+                                id: `${item.id}`,
+                            }) },
+                        {
+                            text: 'Eliminar',
+                            onPress: () => this.deleteCourse(item.id),
+                            style: 'cancel',
+                        },
+                        { text: 'Cancelar', onPress: () => console.log('OK Pressed') },
+                    ],
+                    { cancelable: false },
+                );
+            }}
             onPress={() => {
                 this.props.navigation.navigate('TeesComplete', { courseId: item.id });
             }}
@@ -80,6 +99,21 @@ export default class CamposCompleteScreen extends Component {
         this._subscribe = this.props.navigation.addListener('didFocus', () => {
             this.getCampos();
         });
+    }
+    deleteCourse(id) {
+        const { navigation } = this.props;
+        this.setState({
+            isLoading: true
+        });
+        db.deleteCourse(id).then((result) => {
+            console.log(result);
+            this.getCampos();
+        }).catch((err) => {
+            console.log(err);
+            this.setState = {
+                isLoading: false
+            }
+        })
     }
     render() {
         if (this.state.isLoading) {

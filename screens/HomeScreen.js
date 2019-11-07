@@ -101,6 +101,12 @@ export default class HomeScreen extends Component {
           color="#0000ff"
           onPress={() => this.props.navigation.navigate('Settings', { user: this.state.user})}
         />
+        <View style={{ height: 20 }} />
+        <Button
+          title="Rounds"
+          color="#0000ff"
+          onPress={() => this.props.navigation.navigate('Rounds')}
+        />
       </View>
     );
   }

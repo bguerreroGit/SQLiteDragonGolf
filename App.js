@@ -16,6 +16,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { createStackNavigator } from 'react-navigation-stack';
+import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { createAppContainer } from 'react-navigation';
 import HomeScreen from './screens/HomeScreen';
 import CampoScreen from './screens/CamposScreen';
@@ -40,6 +41,48 @@ import AddPlayersScreen from './screens/AddPlayerScreen';
 import ConfigurePlayersScreen from './screens/ConfigurePlayersScreen';
 import EditPlayersScreen from './screens/EditPlayerScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import RoundsScreen from "./screens/RoundsScreen";
+import AddRoundScreen from './screens/AddRoundScreen';
+import ConfigureRoundScreen from './screens/ConfigureRoundScreen';
+import PlayersInRoundScreen from './screens/PlayersInRoundScreen';
+import AddPlayersInRoundScreen from './screens/AddPlayersInRoundScreen';
+
+const RoundPlayersStack = createStackNavigator(
+  {
+    PlayersInRound: {
+      screen: PlayersInRoundScreen
+    },
+    AddPlayersInRound: {
+      screen: AddPlayersInRoundScreen 
+    }
+  },
+  {
+    initialRouteName: 'PlayersInRound',
+    defaultNavigationOptions: {
+      headerStyle: {
+        backgroundColor: '#777777',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    },
+  },
+);
+
+const RoundBottom = createBottomTabNavigator({
+  ConfigureRound: ConfigureRoundScreen,
+  Players: RoundPlayersStack,
+}, {
+  initialRouteName: 'ConfigureRound',
+  activeColor: '#f0edf6',
+  inactiveColor: '#3e2465',
+  shifting: false,
+  barStyle: {
+    backgroundColor: '#694fad',
+  },
+})
+
 
 const RootStack = createStackNavigator(
   {
@@ -65,6 +108,14 @@ const RootStack = createStackNavigator(
     TeesComplete: TeesCompleteScreen,
     ConfigureHoles: ConfigureHolesScreen,
     Settings: SettingsScreen,
+    Rounds: RoundsScreen,
+    AddRound: AddRoundScreen,
+    ConfigureRound: {
+      screen: RoundBottom,
+      navigationOptions: {
+       header: null
+      }
+    }
   },
   {
     initialRouteName: 'Home',
@@ -98,3 +149,6 @@ const styles = StyleSheet.create({
 });
 
 export default App;
+/*Rounds: RoundsScreen,
+    AddRound: AddRoundScreen,
+    ConfigureRound: ConfigureRoundScreen, */

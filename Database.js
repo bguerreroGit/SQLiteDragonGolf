@@ -36,8 +36,8 @@ export default class Database {
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS general_settings(id INTEGER PRIMARY KEY AUTOINCREMENT, rabbit_1_6 INTEGER, rabbit_7_12 INTEGER, rabbit_13_18 INTEGER, medal_play_f9 INTEGER, medal_play_b9 INTEGER, medal_play_18 INTEGER, skins INTEGER, skins_carry_over TINYINT, lowed_adv_on_f9 TINYINT , id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS single_nassau_wagers(id INTEGER PRIMARY KEY AUTOINCREMENT, automatic_presses_every INTEGER, front_9 INTEGER, back_9 INTEGER, match INTEGER, total_18 INTEGER, carry INTEGER, medal INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS team_nassau_wagers(id INTEGER PRIMARY KEY AUTOINCREMENT, automatic_presses_every INTEGER, front_9 INTEGER, back_9 INTEGER, match INTEGER, total_18 INTEGER, carry INTEGER, medal INTEGER, who_gets_the_adv_strokes VARCHAR(20), id_sync INTEGER, ultimate_sync TIMESTAMP)');
-                                tx.executeSql('CREATE TABLE IF NOT EXISTS rounds(id INTEGER PRIMARY KEY AUTOINCREMENT,course_id INTEGER, hcp_adjustment FLOAT, online_key VARCHAR(250), starting_hole INTEGER, adv_b9_f9 TINYINT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
-                                tx.executeSql('CREATE TABLE IF NOT EXISTS round_members(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, tee_id INTEGER, round_id INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS rounds(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(150), course_id INTEGER, hcp_adjustment FLOAT, online_key VARCHAR(250), starting_hole INTEGER, adv_b9_f9 TINYINT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS round_members(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, tee_id INTEGER, round_id INTEGER, handicap FLOAT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                             }).then(() => {
                                 resolve(db);
                                 //console.log("Table created successfully");
@@ -99,6 +99,131 @@ export default class Database {
                     });
                 }).then((result) => {
                     this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    listRounds() {
+        return new Promise((resolve) => {
+            const rounds = [];
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT * FROM rounds', []).then(([tx, results]) => {
+                        console.log("Query completed");
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            console.log(`Course ID: ${row.id}, Course Name: ${row.name}`);
+                            const { id, name, course_id, hcp_adjustment, online_key, starting_hole, adv_b9_f9, id_sync, ultimate_sync } = row;
+                            rounds.push({
+                                id,
+                                name,
+                                course_id, 
+                                hcp_adjustment, 
+                                online_key, 
+                                starting_hole, 
+                                adv_b9_f9, 
+                                id_sync, 
+                                ultimate_sync
+                            });
+                        }
+                        console.log(rounds);
+                        resolve(rounds);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    listRoundJOIN() {
+        return new Promise((resolve) => {
+            const rounds = [];
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT rounds.id, rounds.name, rounds.course_id, rounds.hcp_adjustment, rounds.online_key, rounds.starting_hole, rounds.adv_b9_f9, rounds.id_sync, rounds.ultimate_sync, round_members.handicap, round_members.id FROM rounds LEFT JOIN round_members ON rounds.id=round_members.round_id', []).then(([tx, results]) => {
+                        var len = results.rows.length;
+                        console.log('===================== RESULTADOS =================');
+                        console.log(results.rows);
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            alert('entra');
+                            console.log('====================================== RONDA ============================');
+                            console.log(`Ronda ID: ${row.id}, Ronda Name: ${row.name}`);
+                            console.log(row);
+                            const { id, name, course_id, hcp_adjustment, online_key, starting_hole, adv_b9_f9, id_sync, ultimate_sync } = row;
+                            rounds.push({
+                                id,
+                                name,
+                                course_id,
+                                hcp_adjustment,
+                                online_key,
+                                starting_hole,
+                                adv_b9_f9,
+                                id_sync,
+                                ultimate_sync
+                            });
+                        }
+                        console.log(rounds);
+                        resolve(rounds);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    listMembersByRoundId(round_id) {
+        return new Promise((resolve) => {
+            const members = [];
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT round_members.id, round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo  FROM round_members, tees, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND round_members.round_id=?', [round_id]).then(([tx, results]) => {
+                        console.log("Query completed");
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            console.log(`Member ID: ${row.id}`);
+                            console.log(row);
+                            const { color, handicap, id, name , nick_name, photo, player_id, tee_id, id_sync, ultimate_sync } = row;
+                            members.push({
+                                id,
+                                player: {
+                                    id: player_id,
+                                    nick_name: nick_name,
+                                    photo: photo,
+                                }, 
+                                tee: {
+                                    id: tee_id,
+                                    name: name,
+                                    color: color
+                                }, 
+                                round_id,  
+                                handicap,
+                                id_sync, 
+                                ultimate_sync
+                            });
+                        }
+                        console.log(members);
+                        resolve(members);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
                 }).catch((err) => {
                     console.log(err);
                 });
@@ -292,7 +417,7 @@ export default class Database {
                         resolve(players);
                     });
                 }).then((result) => {
-                    this.closeDatabase(db);
+                   // this.closeDatabase(db);
                 }).catch((err) => {
                     console.log(err);
                 });
@@ -517,6 +642,42 @@ export default class Database {
         });
     }
 
+    addRound(round) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('INSERT INTO rounds(name, course_id, hcp_adjustment, online_key, starting_hole, adv_b9_f9, id_sync, ultimate_sync) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [round.name, round.course_id, round.hcp_adjustment, round.online_key, round.starting_hole, round.adv_b9_f9, round.id_sync, round.ultimate_sync]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    addMember(member) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('INSERT INTO round_members(player_id, tee_id, round_id, handicap, id_sync, ultimate_sync) VALUES (?, ?, ?, ?, ?, ?)', [member.player_id, member.tee_id, member.round_id, member.handicap, member.id_sync, member.ultimate_sync]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
     add18Holes(holes) {
         values=[];
         holes.forEach(h => {
@@ -690,15 +851,51 @@ export default class Database {
         });
     }
 
-    updateCourse(id, course) {
+    updateRound(round) {
         return new Promise((resolve) => {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
-                    tx.executeSql('UPDATE courses SET name = ?, short_name = ?, address = ?, city = ?, country= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [course.name, course.short_name, course.address, course.city, course.country, course.id_sync, course.ultimate_sync, id]).then(([tx, results]) => {
+                    tx.executeSql('UPDATE rounds SET name=?, hcp_adjustment=?, online_key=?, starting_hole=?, adv_b9_f9=?, id_sync=?, ultimate_sync=? WHERE id=?', [round.name, round.hcp_adjustment, round.online_key, round.starting_hole, round.adv_b9_f9, round.id_sync, round.ultimate_sync, round.id]).then(([tx, results]) => {
                         resolve(results);
                     });
                 }).then((result) => {
-                    this.closeDatabase(db);
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    updateOnlineKeyRound(id, hcp_adjustment) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('UPDATE rounds SET name=?, hcp_adjustment=?, online_key=?, starting_hole=?, adv_b9_f9=?, id_sync=?, ultimate_sync=? WHERE id=?', [round.name, round.hcp_adjustment, round.online_key, round.starting_hole, round.adv_b9_f9, round.id_sync, round.ultimate_sync, round.id]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    updateCourse(course) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('UPDATE courses SET name = ?, short_name = ?, address = ?, city = ?, country= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [course.name, course.short_name, course.address, course.city, course.country, course.id_sync, course.ultimate_sync, course.id]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
                 }).catch((err) => {
                     console.log(err);
                 });
@@ -879,7 +1076,45 @@ export default class Database {
                         resolve(results);
                     });
                 }).then((result) => {
-                    this.closeDatabase(db);
+                   // this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    deleteRound(id) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('DELETE FROM rounds WHERE id = ?', [id]).then(([tx, results]) => {
+                        console.log(results);
+                        resolve(results);
+                    });
+                }).then((result) => {
+                   // this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    deleteMember(id) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('DELETE FROM round_members WHERE id = ?', [id]).then(([tx, results]) => {
+                        console.log(results);
+                        resolve(results);
+                    });
+                }).then((result) => {
+                   // this.closeDatabase(db);
                 }).catch((err) => {
                     console.log(err);
                 });
@@ -917,7 +1152,7 @@ export default class Database {
                         resolve(results);
                     });
                 }).then((result) => {
-                    this.closeDatabase(db);
+                   // this.closeDatabase(db);
                 }).catch((err) => {
                     console.log(err);
                 });

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, ScrollView, ActivityIndicator, View, TextInput } from 'react-native';
 import { Button } from 'react-native-elements';
 import Database from '../Database';
+import moment from "moment";
 
 const db = new Database();
 
@@ -66,7 +67,7 @@ export default class EditarCampoScreen extends Component {
             slope: this.state.slope,
             course_id: this.state.course_id,
             id_sync: this.state.id_sync,
-            ultimate_sync: this.state.ultimate_sync,
+            ultimate_sync: moment().format('YYYY-MM-DD HH:mm:ss'),
         };
 
         db.updateTee(this.state.id, data).then((result) => {
@@ -127,20 +128,6 @@ export default class EditarCampoScreen extends Component {
                         placeholder={'Course ID'}
                         value={this.state.course_id.toString()}
                         onChangeText={(text) => this.updateTextInput(text, 'course_id')}
-                    />
-                </View>
-                <View style={styles.subContainer}>
-                    <TextInput
-                        placeholder={'Id Sync'}
-                        value={this.state.id_sync.toString()}
-                        onChangeText={(text) => this.updateTextInput(text, 'id_sync')}
-                    />
-                </View>
-                <View style={styles.subContainer}>
-                    <TextInput
-                        placeholder={'Ultimate Sync'}
-                        value={this.state.ultimate_sync}
-                        onChangeText={(text) => this.updateTextInput(text, 'ultimate_sync')}
                     />
                 </View>
                 <View style={styles.button}>

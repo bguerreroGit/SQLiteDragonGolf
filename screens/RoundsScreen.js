@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-/* eslint-disable react-native/no-inline-styles */
 import React, { Component } from 'react';
 import {
     View,
@@ -7,56 +6,50 @@ import {
     ActivityIndicator,
     FlatList,
     StyleSheet,
-    Alert,
+    Alert
 } from 'react-native';
 import { Button, ListItem } from 'react-native-elements';
 import Database from '../Database';
 
 const db = new Database();
 
-export default class TeesCompleteScreen extends Component {
+export default class RoundsScreen extends Component {
     constructor(props) {
         super(props);
-        const { courseId } = this.props.navigation.state.params;
         this.state = {
             isLoading: true,
-            tees: [],
-            holes: [],
+            rounds: [],
             notFound:
-                'Tees no encontrados.\nPorfavor seleccione (+) boton para agregar alguno.',
+                'Rondas no encontrados.\nPorfavor seleccione (+) boton para agregar alguno.',
         };
-        console.log('============================== COURSE ID =============================');
-        console.log('course Id: ', courseId)
-        console.log('============================== END COURSE ID =============================');
     }
 
     static navigationOptions = ({ navigation }) => {
         return {
-            title: 'Lista de Tees',
+            title: 'Lista de Rondas',
             headerRight: (
                 <Button
                     buttonStyle={{ padding: 0, backgroundColor: 'transparent' }}
                     icon={{ name: 'add-circle', style: { marginRight: 0, fontSize: 28 } }}
                     onPress={() => {
-                        navigation.navigate('AddTeeComplete', {
-                            courseId: navigation.state.params.courseId,
+                        navigation.navigate('AddRound', {
+                            onNavigateBack: this.handleOnNavigateBack,
                         });
                     }}
                 />
             ),
         };
     };
-
-    getTees() {
-        let tees = [];
-        const {courseId}=this.props.navigation.state.params;
-        db.listTeeByCourseId(courseId)
+    
+    getRounds() {
+        let rounds = [];
+        db.listRounds()
             .then(data => {
-                tees = data;
-                console.log('Tees********************');
-                //Alert.alert(JSON.stringify(holes));
+                rounds = data;
+                console.log('***************** Rounds ********************');
+                //Alert.alert(JSON.stringify(campos));
                 this.setState({
-                    tees,
+                    rounds,
                     isLoading: false,
                 });
             })
@@ -72,8 +65,8 @@ export default class TeesCompleteScreen extends Component {
 
     renderItem = ({ item }) => (
         <ListItem
-            title={"Tee " + item.name}
-            subtitle={"Color " + item.color}
+            title={item.name}
+            subtitle={item.online_key}
             leftIcon={{ name: 'check-circle' }}
             onLongPress={() => {
                 Alert.alert(
@@ -81,13 +74,8 @@ export default class TeesCompleteScreen extends Component {
                     'Eliga una opción',
                     [
                         {
-                            text: 'Editar', onPress: () => this.props.navigation.navigate('EditarTee', {
-                                id: `${item.id}`,
-                            })
-                        },
-                        {
                             text: 'Eliminar',
-                            onPress: () => this.deleteTee(item.id),
+                            onPress: () => this.deleteRound(item.id),
                             style: 'cancel',
                         },
                         { text: 'Cancelar', onPress: () => console.log('OK Pressed') },
@@ -96,10 +84,7 @@ export default class TeesCompleteScreen extends Component {
                 );
             }}
             onPress={() => {
-                this.props.navigation.navigate('ConfigureHoles', {
-                    tee: item,
-                    courseId: this.props.navigation.state.params.courseId,
-                });
+                this.props.navigation.navigate('ConfigureRound', { round: item });
             }}
             chevron
             bottomDivider
@@ -108,17 +93,17 @@ export default class TeesCompleteScreen extends Component {
 
     componentDidMount() {
         this._subscribe = this.props.navigation.addListener('didFocus', () => {
-            this.getTees();
+            this.getRounds();
         });
     }
-    deleteTee(id) {
+    deleteRound(id) {
         const { navigation } = this.props;
         this.setState({
             isLoading: true
         });
-        db.deleteTee(id).then((result) => {
+        db.deleteRound(id).then((result) => {
             console.log(result);
-            this.getTees();
+            this.getRounds();
         }).catch((err) => {
             console.log(err);
             this.setState = {
@@ -134,7 +119,7 @@ export default class TeesCompleteScreen extends Component {
                 </View>
             );
         }
-        if (this.state.tees.length === 0) {
+        if (this.state.rounds.length === 0) {
             return (
                 <View>
                     <Text style={styles.message}>{this.state.notFound}</Text>
@@ -144,7 +129,7 @@ export default class TeesCompleteScreen extends Component {
         return (
             <FlatList
                 keyExtractor={this.keyExtractor}
-                data={this.state.tees}
+                data={this.state.rounds}
                 renderItem={this.renderItem}
             />
         );
