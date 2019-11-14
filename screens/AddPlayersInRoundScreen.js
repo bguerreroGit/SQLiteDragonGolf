@@ -81,6 +81,20 @@ export default class AddPlayersInRoundScreen extends Component {
         state[field] = text;
         this.setState(state);
     }
+
+    calculeHandicapAndAdvStrokes= (value, index) => {
+            let handicapCampo = ((this.state.handicap * this.state.tees[index].slope) / 113);
+            console.log('==================== TEEE =================');
+            console.log('Slope: ', this.state.tees[index].slope);
+            console.log('Handicap con decimales: ', handicapCampo);
+            console.log('Redondeado: ', handicapCampo.toFixed(0));                                        
+            console.log('===================== END ===================');
+            this.setState({
+                tee_id: this.state.tees[index].id,
+                handicap: handicapCampo.toFixed(0),
+            }); 
+        }
+
     saveMember() {
         this.setState({
             isLoading: true,
@@ -147,18 +161,7 @@ export default class AddPlayersInRoundScreen extends Component {
                     <Dropdown
                         label='Tee'
                         data={this.state.tees}
-                        onChangeText={(value, index) => {
-                            let handicapCampo = ((this.state.handicap * this.state.tees[index].slope) / 113);
-                            console.log('==================== TEEE =================');
-                            console.log('Slope: ', this.state.tees[index].slope);
-                            console.log('Handicap con decimales: ', handicapCampo);
-                            console.log('Redondeado: ', handicapCampo.toFixed(0));                                        
-                            console.log('===================== END ===================');
-                            this.setState({
-                                tee_id: this.state.tees[index].id,
-                                handicap: handicapCampo.toFixed(0),
-                            }); 
-                        }}
+                        onChangeText={this.calculeHandicapAndAdvStrokes}
                     />
                 </View>
                 <View style={styles.button}>

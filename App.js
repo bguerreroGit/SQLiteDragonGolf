@@ -56,6 +56,14 @@ import ScoreHoleSevenScreen from './screens/ScoreHoleSevenScreen';
 import ScoreHoleEightScreen from './screens/ScoreHoleEightScreen';
 import ScoreHoleNineScreen from './screens/ScoreHoleNineScreen';
 import ScoreHoleTenScreen from './screens/ScoreHoleTenScreen';
+import ScoreHoleElevenScreen from './screens/ScoreHoleElevenScreen';
+import ScoreHoleTwelveScreen from './screens/ScoreHoleTwelveScreen';
+import ScoreHoleThirteenScreen from './screens/ScoreHoleThirteenScreen';
+import ScoreHoleFourteenScreen from './screens/ScoreHoleFourteenScreen';
+import ScoreHoleFiveteenScreen from './screens/ScoreFiveteenScreen';
+import ScoreHoleSixteenScreen from './screens/ScoreHoleSixteenScreen';
+import ScoreHoleSeventeenScreen from './screens/ScoreHoleSeventeenScreen';
+import ScoreHoleEighteenScreen from './screens/ScoreHoleEighteenScreen';
 
 const RoundPlayersStack = createStackNavigator(
   {
@@ -111,6 +119,30 @@ const ScoreHolesStack = createStackNavigator(
     },
     Hole_10: {
       screen: ScoreHoleTenScreen
+    },
+    Hole_11: {
+      screen: ScoreHoleElevenScreen
+    },
+    Hole_12: {
+      screen: ScoreHoleTwelveScreen
+    },
+    Hole_13: {
+      screen: ScoreHoleThirteenScreen
+    },
+    Hole_14: {
+      screen: ScoreHoleFourteenScreen
+    },
+    Hole_15: {
+      screen: ScoreHoleFiveteenScreen
+    },
+    Hole_16: {
+      screen: ScoreHoleSixteenScreen
+    },
+    Hole_17: {
+      screen:  ScoreHoleSeventeenScreen
+    },
+    Hole_18: {
+      screen: ScoreHoleEighteenScreen
     }
   },
   {

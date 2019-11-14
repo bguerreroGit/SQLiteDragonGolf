@@ -71,13 +71,39 @@ export default class PlayersScreen extends Component {
             subtitle={item.nick_name}
             leftIcon={{ name: 'check-circle' }}
             onPress={() => {
-                this.props.navigation.navigate('EditPlayer', { player: item });
-            }}
+                Alert.alert(
+                  'Acciones',
+                  'Eliga una opción',
+                  [
+                    {
+                      text: 'Eliminar',
+                      onPress: () => this.deletePlayer(item.id),
+                      style: 'cancel',
+                    },
+                    { text: 'Cancelar', onPress: () => console.log('OK Pressed') },
+                  ],
+                  { cancelable: false },
+                );
+              }}
             chevron
             bottomDivider
         />
     );
-
+    deletePlayer(id) {
+        const { navigation } = this.props;
+        this.setState({
+          isLoading: true
+        });
+        db.deletePlayer(id).then((result) => {
+          console.log(result);
+          this.getPlayers();
+        }).catch((err) => {
+          console.log(err);
+          this.setState = {
+            isLoading: false
+          }
+        })
+      }
     componentDidMount() {
         this._subscribe = this.props.navigation.addListener('didFocus', () => {
             this.getPlayers();

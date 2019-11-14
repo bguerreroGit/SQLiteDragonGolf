@@ -37,7 +37,7 @@ export default class Database {
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS single_nassau_wagers(id INTEGER PRIMARY KEY AUTOINCREMENT, automatic_presses_every INTEGER, front_9 INTEGER, back_9 INTEGER, match INTEGER, total_18 INTEGER, carry INTEGER, medal INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS team_nassau_wagers(id INTEGER PRIMARY KEY AUTOINCREMENT, automatic_presses_every INTEGER, front_9 INTEGER, back_9 INTEGER, match INTEGER, total_18 INTEGER, carry INTEGER, medal INTEGER, who_gets_the_adv_strokes VARCHAR(20), id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS rounds(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(150), course_id INTEGER, date DATE, hcp_adjustment FLOAT, online_key VARCHAR(250), starting_hole INTEGER, adv_b9_f9 TINYINT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
-                                tx.executeSql('CREATE TABLE IF NOT EXISTS round_members(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, tee_id INTEGER, round_id INTEGER, handicap FLOAT, strokes_h1 INTEGER, adv_h1 INTEGER, strokes_h2 INTEGER, adv_h2 INTEGER, strokes_h3 INTEGER, adv_h3 INTEGER, strokes_h4 INTEGER, adv_h4 INTEGER, strokes_h5 INTEGER, adv_h5 INTEGER, strokes_h6 INTEGER, adv_h6 INTEGER, strokes_h7 INTEGER, adv_h7 INTEGER, strokes_h8 INTEGER, adv_h8 INTEGER, strokes_h9 INTEGER, adv_h9 INTEGER, strokes_h10 INTEGER, adv_h10 INTEGER, strokes_h11 INTEGER, adv_h11 INTEGER, strokes_h12 INTEGER, adv_h12 INTEGER,strokes_h13 INTEGER, strokes_h14 INTEGER, strokes_h15 INTEGER, strokes_h16 INTEGER, strokes_h17 INTEGER, strokes_h18 INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS round_members(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, nick_name VARCHAR(10), photo VARCHAR(200), tee_id INTEGER, round_id INTEGER, handicap FLOAT, strokes_h1 INTEGER, adv_h1 INTEGER, strokes_h2 INTEGER, adv_h2 INTEGER, strokes_h3 INTEGER, adv_h3 INTEGER, strokes_h4 INTEGER, adv_h4 INTEGER, strokes_h5 INTEGER, adv_h5 INTEGER, strokes_h6 INTEGER, adv_h6 INTEGER, strokes_h7 INTEGER, adv_h7 INTEGER, strokes_h8 INTEGER, adv_h8 INTEGER, strokes_h9 INTEGER, adv_h9 INTEGER, strokes_h10 INTEGER, adv_h10 INTEGER, strokes_h11 INTEGER, adv_h11 INTEGER, strokes_h12 INTEGER, adv_h12 INTEGER,strokes_h13 INTEGER, strokes_h14 INTEGER, strokes_h15 INTEGER, strokes_h16 INTEGER, strokes_h17 INTEGER, strokes_h18 INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                             }).then(() => {
                                 resolve(db);
                                 //console.log("Table created successfully");
@@ -195,7 +195,7 @@ export default class Database {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
                     tx.executeSql('SELECT round_members.id, round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo  FROM round_members, tees, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND round_members.round_id=?', [round_id]).then(([tx, results]) => {
-                        console.log("Query completed");
+                        //console.log("============================ Query completed ========================================");
                         var len = results.rows.length;
                         for (let i = 0; i < len; i++) {
                             let row = results.rows.item(i);
@@ -219,7 +219,7 @@ export default class Database {
                                 ultimate_sync
                             });
                         }
-                        console.log(members);
+                        //console.log(members);
                         resolve(members);
                     });
                 }).then((result) => {
@@ -1892,6 +1892,25 @@ export default class Database {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
                     tx.executeSql('DELETE FROM round_members WHERE id = ?', [id]).then(([tx, results]) => {
+                        console.log(results);
+                        resolve(results);
+                    });
+                }).then((result) => {
+                   // this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    deletePlayer(id) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('DELETE FROM players WHERE id = ?', [id]).then(([tx, results]) => {
                         console.log(results);
                         resolve(results);
                     });
