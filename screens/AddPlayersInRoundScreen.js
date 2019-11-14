@@ -103,6 +103,7 @@ export default class AddPlayersInRoundScreen extends Component {
             // Alert.alert('ID DE COURSE: ', result.insertId);
             console.log('================== FINAL DE MEMBER ====================================');
             //Alert.alert(JSON.stringify(result));
+            
             this.setState({
                 isLoading: false,
             });

@@ -36,8 +36,8 @@ export default class Database {
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS general_settings(id INTEGER PRIMARY KEY AUTOINCREMENT, rabbit_1_6 INTEGER, rabbit_7_12 INTEGER, rabbit_13_18 INTEGER, medal_play_f9 INTEGER, medal_play_b9 INTEGER, medal_play_18 INTEGER, skins INTEGER, skins_carry_over TINYINT, lowed_adv_on_f9 TINYINT , id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS single_nassau_wagers(id INTEGER PRIMARY KEY AUTOINCREMENT, automatic_presses_every INTEGER, front_9 INTEGER, back_9 INTEGER, match INTEGER, total_18 INTEGER, carry INTEGER, medal INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS team_nassau_wagers(id INTEGER PRIMARY KEY AUTOINCREMENT, automatic_presses_every INTEGER, front_9 INTEGER, back_9 INTEGER, match INTEGER, total_18 INTEGER, carry INTEGER, medal INTEGER, who_gets_the_adv_strokes VARCHAR(20), id_sync INTEGER, ultimate_sync TIMESTAMP)');
-                                tx.executeSql('CREATE TABLE IF NOT EXISTS rounds(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(150), course_id INTEGER, hcp_adjustment FLOAT, online_key VARCHAR(250), starting_hole INTEGER, adv_b9_f9 TINYINT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
-                                tx.executeSql('CREATE TABLE IF NOT EXISTS round_members(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, tee_id INTEGER, round_id INTEGER, handicap FLOAT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS rounds(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(150), course_id INTEGER, date DATE, hcp_adjustment FLOAT, online_key VARCHAR(250), starting_hole INTEGER, adv_b9_f9 TINYINT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS round_members(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, tee_id INTEGER, round_id INTEGER, handicap FLOAT, strokes_h1 INTEGER, adv_h1 INTEGER, strokes_h2 INTEGER, adv_h2 INTEGER, strokes_h3 INTEGER, adv_h3 INTEGER, strokes_h4 INTEGER, adv_h4 INTEGER, strokes_h5 INTEGER, adv_h5 INTEGER, strokes_h6 INTEGER, adv_h6 INTEGER, strokes_h7 INTEGER, adv_h7 INTEGER, strokes_h8 INTEGER, adv_h8 INTEGER, strokes_h9 INTEGER, adv_h9 INTEGER, strokes_h10 INTEGER, adv_h10 INTEGER, strokes_h11 INTEGER, adv_h11 INTEGER, strokes_h12 INTEGER, adv_h12 INTEGER,strokes_h13 INTEGER, strokes_h14 INTEGER, strokes_h15 INTEGER, strokes_h16 INTEGER, strokes_h17 INTEGER, strokes_h18 INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                             }).then(() => {
                                 resolve(db);
                                 //console.log("Table created successfully");
@@ -119,10 +119,11 @@ export default class Database {
                         for (let i = 0; i < len; i++) {
                             let row = results.rows.item(i);
                             console.log(`Course ID: ${row.id}, Course Name: ${row.name}`);
-                            const { id, name, course_id, hcp_adjustment, online_key, starting_hole, adv_b9_f9, id_sync, ultimate_sync } = row;
+                            const { id, name, date, course_id, hcp_adjustment, online_key, starting_hole, adv_b9_f9, id_sync, ultimate_sync } = row;
                             rounds.push({
                                 id,
                                 name,
+                                date,
                                 course_id, 
                                 hcp_adjustment, 
                                 online_key, 
@@ -199,7 +200,6 @@ export default class Database {
                         for (let i = 0; i < len; i++) {
                             let row = results.rows.item(i);
                             console.log(`Member ID: ${row.id}`);
-                            console.log(row);
                             const { color, handicap, id, name , nick_name, photo, player_id, tee_id, id_sync, ultimate_sync } = row;
                             members.push({
                                 id,
@@ -229,6 +229,788 @@ export default class Database {
                 });
             }).catch((err) => {
                 console.log(err);
+            });
+        });
+    }
+
+    listMembersByRoundIdHole(hole,round_id) {
+        return new Promise((resolve) => {
+            const members = [];
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    switch (hole) {
+                        case 1:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h1, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h1, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h1: strokes_h1==null ? '' : strokes_h1.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 2:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h2, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h2, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h2: strokes_h2==null ? '' : strokes_h2.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 3:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h3, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h3, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h3: strokes_h3 == null ? '' : strokes_h3.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 4:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h4, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h4, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h4: strokes_h4 == null ? '' : strokes_h4.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 5:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h5, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h5, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h5: strokes_h5 == null ? '' : strokes_h5.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 6:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h6, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h6, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h6: strokes_h6 == null ? '' : strokes_h6.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 7:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h7, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    console.log(row);
+                                    const { color, handicap, id, strokes_h7, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h7: strokes_h7 == null ? '' : strokes_h7.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 8:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h8, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h8, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h8: strokes_h8 == null ? '' : strokes_h8.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 9:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h9, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h9, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h9: strokes_h9 == null ? '' : strokes_h9.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            })
+                            break;
+                        case 10:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h10, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h10, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h10: strokes_h10 == null ? '' : strokes_h10.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 11:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h11, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h11, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h11: strokes_h11 == null ? '' : strokes_h11.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 12:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h12, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h12, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h12: strokes_h12 == null ? '' : strokes_h12.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 13:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h13, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h13, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h13: strokes_h13 == null ? '' : strokes_h13.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 14:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h14, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h14, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h14: strokes_h14 == null ? '' : strokes_h14.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 15:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h15, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h15, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h15: strokes_h15 == null ? '' : strokes_h15.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 16:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h16, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h16, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h16: strokes_h16 == null ? '' : strokes_h16.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 17:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h17, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h17, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h17: strokes_h17 == null ? '' : strokes_h17.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        case 18:
+                            tx.executeSql('SELECT round_members.id, round_members.strokes_h18, round_members.adv_h1,round_members.player_id, round_members.tee_id, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name, players.photo, holes.par, holes.adv, holes.yards  FROM round_members, tees, holes, players WHERE tees.id=round_members.tee_id AND players.id=round_members.player_id AND holes.tee_id=round_members.tee_id AND holes.hole_number=? AND round_members.round_id=? ', [hole, round_id]).then(([tx, results]) => {
+                                var len = results.rows.length;
+                                for (let i = 0; i < len; i++) {
+                                    let row = results.rows.item(i);
+                                    console.log(`Member ID: ${row.id}`);
+                                    //console.log(row);
+                                    const { color, handicap, id, strokes_h18, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync, par, adv, yards } = row;
+                                    members.push({
+                                        key: (i + 1).toString(),
+                                        id,
+                                        strokes_h18: strokes_h18 == null ? '' : strokes_h18.toString(),
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        hole: {
+                                            par: par.toString(),
+                                            adv: adv.toString(),
+                                            yards: yards.toString()
+                                        },
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                                resolve(members);
+                            });
+                            break;
+                        default:
+                            resolve('Hole number invalid');
+                            break;
+                    }
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    updateScoreMemberInHole(hole,member){
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    switch (hole) {
+                        case 1:
+                                tx.executeSql('UPDATE round_members SET strokes_h1= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h1, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 2:
+                                tx.executeSql('UPDATE round_members SET strokes_h2= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h2, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 3:
+                                tx.executeSql('UPDATE round_members SET strokes_h3= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h3, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 4:
+                                tx.executeSql('UPDATE round_members SET strokes_h4= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h4, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 5:
+                                tx.executeSql('UPDATE round_members SET strokes_h5= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h5, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 6:
+                                tx.executeSql('UPDATE round_members SET strokes_h6= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h6, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 7:
+                                tx.executeSql('UPDATE round_members SET strokes_h7= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h7, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                })
+                            break;
+                        case 8:
+                                tx.executeSql('UPDATE round_members SET strokes_h8= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h8, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                })
+                            break;
+                        case 9:
+                                tx.executeSql('UPDATE round_members SET strokes_h9= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h9, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 10:
+                                tx.executeSql('UPDATE round_members SET strokes_h10= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h10, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                })
+                            break;
+                        case 11:
+                                tx.executeSql('UPDATE round_members SET strokes_h11= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h11, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 12:
+                                tx.executeSql('UPDATE round_members SET strokes_h12= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h12, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 13:
+                                tx.executeSql('UPDATE round_members SET strokes_h13= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h13, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 14:
+                                tx.executeSql('UPDATE round_members SET strokes_h14= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h14, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 15:
+                                tx.executeSql('UPDATE round_members SET strokes_h15= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h15, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 16:
+                                tx.executeSql('UPDATE round_members SET strokes_h16= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h16, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 17:
+                                tx.executeSql('UPDATE round_members SET strokes_h17= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h17, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        case 18:
+                                tx.executeSql('UPDATE round_members SET strokes_h18= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [member.strokes_h18, member.id_sync, member.ultimate_sync, member.id]).then(([tx, results]) => {
+                                    resolve(results);
+                                });
+                            break;
+                        default:
+                            resolve('Hole number invalid');
+                            break;
+                        }
+                    }).then((result) => {
+                        resolve(result);
+                        //this.closeDatabase(db);
+                    }).catch((err) => {
+                        console.log(err);
+                        resolve(err);
+                    });
+            }).catch((err) => {
+                console.log(err);
+                resolve(err);
             });
         });
     }
@@ -371,7 +1153,7 @@ export default class Database {
                         resolve(holes);
                     });
                 }).then((result) => {
-                    this.closeDatabase(db);
+                   // this.closeDatabase(db);
                 }).catch((err) => {
                     console.log(err);
                 });
@@ -646,7 +1428,7 @@ export default class Database {
         return new Promise((resolve) => {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
-                    tx.executeSql('INSERT INTO rounds(name, course_id, hcp_adjustment, online_key, starting_hole, adv_b9_f9, id_sync, ultimate_sync) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [round.name, round.course_id, round.hcp_adjustment, round.online_key, round.starting_hole, round.adv_b9_f9, round.id_sync, round.ultimate_sync]).then(([tx, results]) => {
+                    tx.executeSql('INSERT INTO rounds(name, course_id, date, hcp_adjustment, online_key, starting_hole, adv_b9_f9, id_sync, ultimate_sync) VALUES (?, ?, ? , ?, ?, ?, ?, ?, ?)', [round.name, round.course_id, round.date, round.hcp_adjustment, round.online_key, round.starting_hole, round.adv_b9_f9, round.id_sync, round.ultimate_sync]).then(([tx, results]) => {
                         resolve(results);
                     });
                 }).then((result) => {

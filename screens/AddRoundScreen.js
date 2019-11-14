@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import { Switch, Alert, Text, StyleSheet, ScrollView, ActivityIndicator, View, TextInput } from 'react-native';
 import { Button } from 'react-native-elements';
+import DatePicker from 'react-native-datepicker';
 import { Dropdown } from 'react-native-material-dropdown';
 import Database from '../Database';
 import moment from "moment";
@@ -14,6 +15,7 @@ export default class AddRoundScreen extends Component {
         this.state = {
             name: '',
             course_id: '',
+            date: '',
             hcp_adjustment: '',
             online_key: '',
             starting_hole: '',
@@ -61,6 +63,7 @@ export default class AddRoundScreen extends Component {
         let data = {
             name: this.state.name,
             course_id: this.state.course_id,
+            date: this.state.date,
             hcp_adjustment: this.state.hcp_adjustment,
             online_key: this.state.online_key,
             starting_hole: this.state.starting_hole,
@@ -158,6 +161,38 @@ export default class AddRoundScreen extends Component {
                             value={this.state.adv_b9_f9 == 1 ? true : false} />
                     </View>
                 </View>
+                <View style={{ 
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginTop: 20,
+                    alignItems: 'center',
+                    marginBottom: 40 }}>
+                    <Text>Fecha: </Text>
+                    <DatePicker
+                        style={{ width: 200 }}
+                        date={this.state.date}
+                        mode="date"
+                        placeholder="select date"
+                        format="YYYY-MM-DD"
+                        minDate="2016-05-01"
+                        maxDate="3000-06-01"
+                        confirmBtnText="Confirm"
+                        cancelBtnText="Cancel"
+                        customStyles={{
+                            dateIcon: {
+                                position: 'absolute',
+                                left: 0,
+                                top: 4,
+                                marginLeft: 0
+                            },
+                            dateInput: {
+                                marginLeft: 36
+                            }
+                            // ... You can check the source to find the other keys.
+                        }}
+                        onDateChange={(date) => { this.setState({ date: date }) }}
+                    />
+                </View> 
                 <View style={styles.button}>
                     <Button
                         large

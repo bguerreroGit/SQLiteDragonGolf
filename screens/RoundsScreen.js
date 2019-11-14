@@ -65,7 +65,7 @@ export default class RoundsScreen extends Component {
 
     renderItem = ({ item }) => (
         <ListItem
-            title={item.name}
+            title={item.name + ' -> ' + item.date}
             subtitle={item.online_key}
             leftIcon={{ name: 'check-circle' }}
             onLongPress={() => {

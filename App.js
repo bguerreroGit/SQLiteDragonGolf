@@ -46,6 +46,16 @@ import AddRoundScreen from './screens/AddRoundScreen';
 import ConfigureRoundScreen from './screens/ConfigureRoundScreen';
 import PlayersInRoundScreen from './screens/PlayersInRoundScreen';
 import AddPlayersInRoundScreen from './screens/AddPlayersInRoundScreen';
+import ScoreHoleOneScreen from './screens/ScoreHoleOneScreen';
+import ScoreHoleTwoScreen from './screens/ScoreHoleTwoScreen';
+import ScoreHoleThreeScreen from './screens/ScoreHoleThreeScreen';
+import ScoreHoleFourScreen from './screens/ScoreHoleFourScreen';
+import ScoreHoleFiveScreen from './screens/ScoreHoleFiveScreen';
+import ScoreHoleSixScreen from './screens/ScoreHoleSixScreen';
+import ScoreHoleSevenScreen from './screens/ScoreHoleSevenScreen';
+import ScoreHoleEightScreen from './screens/ScoreHoleEightScreen';
+import ScoreHoleNineScreen from './screens/ScoreHoleNineScreen';
+import ScoreHoleTenScreen from './screens/ScoreHoleTenScreen';
 
 const RoundPlayersStack = createStackNavigator(
   {
@@ -70,9 +80,57 @@ const RoundPlayersStack = createStackNavigator(
   },
 );
 
+const ScoreHolesStack = createStackNavigator(
+  {
+    Hole_1: {
+      screen: ScoreHoleOneScreen
+    },
+    Hole_2: {
+      screen: ScoreHoleTwoScreen
+    },
+    Hole_3: {
+      screen: ScoreHoleThreeScreen
+    },
+    Hole_4: {
+      screen: ScoreHoleFourScreen
+    },
+    Hole_5: {
+      screen: ScoreHoleFiveScreen
+    },
+    Hole_6: {
+      screen: ScoreHoleSixScreen
+    },
+    Hole_7: {
+      screen: ScoreHoleSevenScreen
+    },
+    Hole_8: {
+      screen: ScoreHoleEightScreen
+    },
+    Hole_9: {
+      screen: ScoreHoleNineScreen
+    },
+    Hole_10: {
+      screen: ScoreHoleTenScreen
+    }
+  },
+  {
+    initialRouteName: 'Hole_1',
+    defaultNavigationOptions: {
+      headerStyle: {
+        backgroundColor: '#777777',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    },
+  },
+);
+
 const RoundBottom = createBottomTabNavigator({
   ConfigureRound: ConfigureRoundScreen,
   Players: RoundPlayersStack,
+  Score: ScoreHolesStack,
 }, {
   initialRouteName: 'ConfigureRound',
   activeColor: '#f0edf6',
