@@ -14,6 +14,8 @@ export default class AddPlayersInRoundScreen extends Component {
         let valueRound = this.props.navigation.dangerouslyGetParent().state.params.round;
         this.state = {
             player_id: '',
+            nick_name: '',
+            photo: '',
             tee_id: '' ,
             round_id: valueRound.id,
             handicap: '',
@@ -61,7 +63,8 @@ export default class AddPlayersInRoundScreen extends Component {
             result.forEach(element => {
                 players.push({
                     value: element.name,
-                    short_name: element.nick_name,
+                    nick_name: element.nick_name,
+                    photo: element.photo,
                     handicap: element.handicap,
                     id: element.id
                 })
@@ -84,50 +87,124 @@ export default class AddPlayersInRoundScreen extends Component {
 
     calculeHandicapAndAdvStrokes= (value, index) => {
             let handicapCampo = ((this.state.handicap * this.state.tees[index].slope) / 113);
+            let numberHole=null;
+            let i=0;
+            let adv=null;
+            let holes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let advStrokes=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
             console.log('==================== TEEE =================');
             console.log('Slope: ', this.state.tees[index].slope);
             console.log('Handicap con decimales: ', handicapCampo);
             console.log('Redondeado: ', handicapCampo.toFixed(0));                                        
             console.log('===================== END ===================');
-            this.setState({
-                tee_id: this.state.tees[index].id,
-                handicap: handicapCampo.toFixed(0),
-            }); 
+        this.setState({
+            tee_id: this.state.tees[index].id,
+            handicap: handicapCampo.toFixed(0),
+        }); /*
+            auxHandicapCampo = handicapCampo.toFixed(0);
+            while (auxHandicapCampo > 0) {
+                advStrokes[i] = advStrokes[i] + 1;
+                //console.log('Index: ' + i + ' Ventaja: '  +  advStrokes[i]);
+                auxHandicapCampo = auxHandicapCampo - 1;
+                i++;
+                if (i == 18) {
+                    i = 0;
+                }
+            }
+            db.holesByTeeId(this.state.tees[index].id).then(result => {
+                result.forEach(element => {
+                    numberHole = parseInt(element.hole_number) - 1;
+                    adv= parseInt(element.adv) - 1;
+                    holes[numberHole]= advStrokes[adv];
+                    console.log('Hole number: ' + element.hole_number + ' Advantage (handicap hoyo): ' + element.adv + '  Golpes de ventaja: ' + advStrokes[adv]);
+                });
+                console.log('=============== VETAJAS EN CADA HOYO =============================');
+                console.log(holes);
+                this.setState({
+                    tee_id: this.state.tees[index].id,
+                    handicap: handicapCampo,
+                }); 
+            }).catch(err => console.log(err))
+            */
         }
 
     saveMember() {
         this.setState({
             isLoading: true,
         });
-        let data = {
-            player_id: this.state.player_id,
-            tee_id: this.state.tee_id,
-            round_id: this.state.round_id,
-            handicap: this.state.handicap,
-            id_sync: this.state.id_sync,
-            ultimate_sync: moment().format('YYYY-MM-DD HH:mm:ss'),
-        };
-        console.log('================== DATA ====================================');
-        console.log(data);
-        console.log('================== FINAL DE DATA ====================================');
+        let numberHole = null;
+        let i = 0;
+        let adv = null;
+        let holes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let advStrokes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let auxHandicapCampo = this.state.handicap;
+        while (auxHandicapCampo > 0) {
+            advStrokes[i] = advStrokes[i] + 1;
+           /* console.log('Index: ' + i + ' Ventaja: '  +  advStrokes[i]);
+            console.log('Handicap de campo: ', auxHandicapCampo); */
+            auxHandicapCampo = auxHandicapCampo - 1;
+            i++;
+            if (i == 18) {
+                i = 0;
+            }
+        }
+        db.holesByTeeId(this.state.tee_id).then(result => {
+            result.forEach(element => {
+                numberHole = parseInt(element.hole_number) - 1;
+                adv = parseInt(element.adv) - 1;
+                holes[numberHole] = advStrokes[adv];
+                console.log('Hole number: ' + element.hole_number + ' Advantage (handicap hoyo): ' + element.adv + '  Golpes de ventaja: ' + advStrokes[adv]);
+            });
 
-        db.addMember(data).then((result) => {
-            console.log('================== MEMBER ====================================');
-            console.log(result);
-            // Alert.alert('ID DE COURSE: ', result.insertId);
-            console.log('================== FINAL DE MEMBER ====================================');
-            //Alert.alert(JSON.stringify(result));
-            
-            this.setState({
-                isLoading: false,
-            });
-            this.props.navigation.goBack();
-        }).catch((err) => {
-            console.log(err);
-            this.setState({
-                isLoading: false,
-            });
-        })
+            let data = {
+                player_id: this.state.player_id,
+                nick_name: this.state.nick_name, 
+                photo: this.state.photo,
+                tee_id: this.state.tee_id,
+                round_id: this.state.round_id,
+                handicap: this.state.handicap,
+                adv_h1: holes[0], 
+                adv_h2: holes[1], 
+                adv_h3: holes[2], 
+                adv_h4: holes[3], 
+                adv_h5: holes[4], 
+                adv_h6: holes[5], 
+                adv_h7: holes[6], 
+                adv_h8: holes[7], 
+                adv_h9: holes[8], 
+                adv_h10: holes[9], 
+                adv_h11: holes[10], 
+                adv_h12: holes[11], 
+                adv_h13: holes[12], 
+                adv_h14: holes[13], 
+                adv_h15: holes[14], 
+                adv_h16: holes[15], 
+                adv_h17: holes[16], 
+                adv_h18: holes[17],
+                id_sync: this.state.id_sync,
+                ultimate_sync: moment().format('YYYY-MM-DD HH:mm:ss'),
+            };
+            console.log('================== DATA ====================================');
+            console.log(data);
+            console.log('================== FINAL DE DATA ====================================');
+            db.addMember(data).then((result) => {
+                console.log('================== MEMBER ====================================');
+                console.log(result);
+                // Alert.alert('ID DE COURSE: ', result.insertId);
+                console.log('================== FINAL DE MEMBER ====================================');
+                //Alert.alert(JSON.stringify(result));
+
+                this.setState({
+                    isLoading: false,
+                });
+                this.props.navigation.goBack();
+            }).catch((err) => {
+                console.log(err);
+                this.setState({
+                    isLoading: false,
+                });
+            })
+        }).catch(err => console.log(err))
     }
 
     render() {
@@ -150,6 +227,8 @@ export default class AddPlayersInRoundScreen extends Component {
                             this.setState({
                                 player_id: this.state.players[index].id,
                                 handicap: this.state.players[index].handicap,
+                                nick_name: this.state.players[index].nick_name,
+                                photo: this.state.players[index].photo,
                             });
                         }}
                     />
