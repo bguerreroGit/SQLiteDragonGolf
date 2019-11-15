@@ -1,9 +1,8 @@
 import React, { PureComponent } from 'react';
-import { Switch, View, Text, StyleSheet, TextInput, StatusBar } from 'react-native';
-import { ButtonGroup, Header } from 'react-native-elements';
+import { Switch, View, Text, StyleSheet, TextInput, StatusBar, TouchableOpacity } from 'react-native';
+import { ButtonGroup, Header, Icon } from 'react-native-elements';
 import Database from '../Database';
 import moment from "moment";
-import { hidden } from 'ansi-colors';
 
 const db = new Database();
 
@@ -33,10 +32,7 @@ class ConfigureRoundScreen extends PureComponent {
    
   }
 
-  static navigationOptions = {
-    title: 'Ronda',
-    
-  };
+  
 
   updateNameRound(text) {
     this.setState({
@@ -184,8 +180,22 @@ class ConfigureRoundScreen extends PureComponent {
       <View style={styles.container}>
         <Header
           placement="center"
-          leftComponent={{ icon: 'home', color: '#fff', onPress: () => this.props.navigation.navigate('Rounds') }}
-          centerComponent={{ text: 'Configurar Ronda', style: { color: '#fff' } }}
+          containerStyle={{
+            paddingTop: 0,
+            height: 60
+          }}
+          backgroundColor='#694fad'
+          leftComponent={
+            <TouchableOpacity
+            onPress={() => this.props.navigation.navigate('Rounds')}>
+              <Icon 
+                name={'arrow-circle-left'}
+                type={'font-awesome'}
+                size={28}
+                color={'#fff'}
+              />
+            </TouchableOpacity>}
+          centerComponent={{ text: 'Configurar Ronda', style: { fontWeight: 'bold', fontSize: 20, color: '#fff' } }}
           
         />
         <View style={styles.body}>

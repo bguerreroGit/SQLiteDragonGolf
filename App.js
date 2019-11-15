@@ -15,6 +15,7 @@ import {
   Text,
   StatusBar,
 } from 'react-native';
+import { Icon } from 'react-native-elements';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { createAppContainer } from 'react-navigation';
@@ -64,6 +65,9 @@ import ScoreHoleFiveteenScreen from './screens/ScoreFiveteenScreen';
 import ScoreHoleSixteenScreen from './screens/ScoreHoleSixteenScreen';
 import ScoreHoleSeventeenScreen from './screens/ScoreHoleSeventeenScreen';
 import ScoreHoleEighteenScreen from './screens/ScoreHoleEighteenScreen';
+import MoreHomeScreen from './screens/MoreHomeScreen';
+import BetsHomeScreen from './screens/BetsHomeScreen';
+import ScoreCardScreen from './screens/ScoreCardScreen';
 
 const RoundPlayersStack = createStackNavigator(
   {
@@ -78,7 +82,56 @@ const RoundPlayersStack = createStackNavigator(
     initialRouteName: 'PlayersInRound',
     defaultNavigationOptions: {
       headerStyle: {
-        backgroundColor: '#777777',
+        backgroundColor: '#694fad',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    },
+  },
+);
+
+const MoreStack = createStackNavigator(
+  {
+    MoreHome: {
+      screen: MoreHomeScreen,
+      navigationOptions: {
+        title: 'More'
+      }
+    },
+    ScoreCard: {
+      screen: ScoreCardScreen,
+    }
+  },
+  {
+    initialRouteName: 'MoreHome',
+    defaultNavigationOptions: {
+      headerStyle: {
+        backgroundColor: '#694fad',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    },
+  },
+);
+
+const BetsStack = createStackNavigator(
+  {
+    BetsHome: {
+      screen: BetsHomeScreen,
+      navigationOptions: {
+        title: 'Bets'
+      }
+    }
+  },
+  {
+    initialRouteName: 'BetsHome',
+    defaultNavigationOptions: {
+      headerStyle: {
+        backgroundColor: '#694fad',
       },
       headerTintColor: '#fff',
       headerTitleStyle: {
@@ -149,7 +202,7 @@ const ScoreHolesStack = createStackNavigator(
     initialRouteName: 'Hole_1',
     defaultNavigationOptions: {
       headerStyle: {
-        backgroundColor: '#777777',
+        backgroundColor: '#694fad',
       },
       headerTintColor: '#fff',
       headerTitleStyle: {
@@ -160,17 +213,88 @@ const ScoreHolesStack = createStackNavigator(
 );
 
 const RoundBottom = createBottomTabNavigator({
-  ConfigureRound: ConfigureRoundScreen,
-  Players: RoundPlayersStack,
-  Score: ScoreHolesStack,
+  ConfigureRound: {
+    screen: ConfigureRoundScreen,
+    navigationOptions: {
+      tabBarLabel: 'Round',
+      tabBarIcon: ({ tintColor }) => (
+        <Icon
+          name={'settings-input-component'}
+          type={'material'}
+          size={26}
+          style={{ marginBottom: -3 }}
+          color={tintColor}
+        />)
+    }
+  },
+  Players: {
+    screen: RoundPlayersStack,
+    navigationOptions: {
+      tabBarLabel: 'Players',
+      tabBarIcon: ({ tintColor }) => (
+        <Icon
+          name={'group'}
+          type={'font-awesome'}
+          size={26}
+          style={{ marginBottom: -3 }}
+          color={tintColor}
+        />)
+    }
+  },
+  Score: { 
+    screen: ScoreHolesStack,
+    navigationOptions: {
+      tabBarLabel: 'Score',
+      tabBarIcon: ({ tintColor }) => (
+        <Icon
+          name={'table-edit'}
+          type={'material-community'}
+          size={26}
+          style={{ marginBottom: -3 }}
+          color={tintColor}
+        />)
+    }
+  },
+  Bets: {
+    screen: BetsStack,
+    navigationOptions: {
+      tabBarLabel: 'Bets',
+      tabBarIcon: ({ tintColor }) => (
+        <Icon
+          name={'money'}
+          type={'font-awesome'}
+          size={26}
+          style={{ marginBottom: -3 }}
+          color={tintColor}
+        />)
+    }
+  },
+  More: {
+    screen: MoreStack,
+    navigationOptions: {
+      tabBarLabel: 'More',
+      tabBarIcon: ({ tintColor }) => (
+        <Icon
+          name={'more-horizontal'}
+          type={'feather'}
+          size={26}
+          style={{ marginBottom: -3 }}
+          color={tintColor}
+        />)
+    }
+  },
 }, {
   initialRouteName: 'ConfigureRound',
-  activeColor: '#f0edf6',
-  inactiveColor: '#3e2465',
-  shifting: false,
-  barStyle: {
-    backgroundColor: '#694fad',
-  },
+    tabBarOptions: {
+      activeTintColor: '#f0edf6',
+      inactiveTintColor: '#3e2465',
+      labelStyle: {
+        fontSize: 12,
+      },
+      style: {
+        backgroundColor: '#694fad',
+      },
+    }
 })
 
 
@@ -203,7 +327,7 @@ const RootStack = createStackNavigator(
     ConfigureRound: {
       screen: RoundBottom,
       navigationOptions: {
-       header: null
+        header: null
       }
     }
   },
@@ -211,7 +335,7 @@ const RootStack = createStackNavigator(
     initialRouteName: 'Home',
     defaultNavigationOptions: {
       headerStyle: {
-        backgroundColor: '#777777',
+        backgroundColor: '#694fad',
       },
       headerTintColor: '#fff',
       headerTitleStyle: {
@@ -226,6 +350,7 @@ const RootContainer = createAppContainer(RootStack);
 const App: () => React$Node = () => {
   return (
     <>
+      <StatusBar backgroundColor={'#694fad'}/>
       <RootContainer style={styles.container}/>
     </>
   );

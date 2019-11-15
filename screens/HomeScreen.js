@@ -64,47 +64,46 @@ export default class HomeScreen extends Component {
 
   render() {
     return (
-      <View>
-        <Text> HomeScreen </Text>
+      <View style={{flex: 1, padding: 20}}>
         <Button
           title="Courses"
-          color="#0000ff"
+          color='#3e2465'
           onPress={() => this.props.navigation.navigate('Campo')}
         />
         <View style={{ height: 20}}/>
         <Button
           title="Holes"
-          color="#0000ff"
+          color='#3e2465'
           onPress={() => this.props.navigation.navigate('Holes')}
         />
         <View style={{ height: 20 }} />
         <Button
           title="Tees"
-          color="#0000ff"
+          color='#3e2465'
           onPress={() => this.props.navigation.navigate('Tees')}
         />
         <View style={{ height: 20 }} />
         <Button
           title="Courses Complete Process"
-          color="#0000ff"
+          color='#3e2465'
           onPress={() => this.props.navigation.navigate('CampoComplete')}
         />
         <View style={{ height: 20 }} />
         <Button
           title="Players"
-          color="#0000ff"
+          color='#3e2465'
           onPress={() => this.props.navigation.navigate('Players')}
         />
         <View style={{ height: 20 }} />
         <Button
           title="Settings"
-          color="#0000ff"
+          color='#3e2465'
           onPress={() => this.props.navigation.navigate('Settings', { user: this.state.user})}
         />
         <View style={{ height: 20 }} />
         <Button
           title="Rounds"
-          color="#0000ff"
+          color='#3e2465'
           onPress={() => this.props.navigation.navigate('Rounds')}
         />
       </View>
