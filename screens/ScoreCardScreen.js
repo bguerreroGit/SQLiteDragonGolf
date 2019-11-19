@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Database from '../Database';
+import moment from "moment";
+
+const db = new Database();
 
 class ScoreCardScreen extends Component {
   constructor(props) {
@@ -10,12 +14,23 @@ class ScoreCardScreen extends Component {
     this.state = {
     };
   }
+
     static navigationOptions = ({ navigation }) => {
         let valueRound = navigation.dangerouslyGetParent().state.params.round;
         return {
             title: 'Score Card: ' + valueRound.name,
         };
     };
+
+  componentDidMount(){
+    let valueRound = this.props.navigation.dangerouslyGetParent().state.params.round;
+    db.listMembersByRoundIdJOIN(valueRound.id).then(result => {
+      //console.log(result);
+      result.forEach(element => {
+        console.log(element);
+      });
+    }).catch(err => console.log(err))
+  }
 
   render() {
     return (

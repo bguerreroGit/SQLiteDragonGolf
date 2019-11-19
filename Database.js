@@ -253,6 +253,94 @@ export default class Database {
         });
     }
 
+    listMembersByRoundIdJOIN(round_id) {
+        return new Promise((resolve) => {
+            const members = [];
+            let holes=[];
+            let member_id=null;
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT round_members.id, round_members.player_id, round_members.nick_name, round_members.photo, round_members.tee_id, round_members.adv_h1, round_members.adv_h2, round_members.adv_h3, round_members.adv_h4, round_members.adv_h5, round_members.adv_h6, round_members.adv_h7, round_members.adv_h8, round_members.adv_h9, round_members.adv_h10, round_members.adv_h11, round_members.adv_h12, round_members.adv_h13, round_members.adv_h14, round_members.adv_h15, round_members.adv_h16, round_members.adv_h17, round_members.adv_h18, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name as player_nick_name, players.photo as player_photo, holes.par, holes.hole_number, holes.adv, holes.yards FROM round_members, tees, players, holes WHERE tees.id=round_members.tee_id AND holes.tee_id=round_members.tee_id AND players.id=round_members.player_id AND round_members.round_id=? ORDER BY round_members.id, holes.hole_number', [round_id]).then(([tx, results]) => {
+                        console.log("============================ Query completed ========================================");
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            const { color, handicap, id, name, nick_name, photo, adv_h1, adv_h2, adv_h3, adv_h4, adv_h5, adv_h6, adv_h7, adv_h8, adv_h9, adv_h10, adv_h11, adv_h12, adv_h13, adv_h14, adv_h15, adv_h16, adv_h17, adv_h18, player_id, tee_id, hole_number, par, id_sync, ultimate_sync } = row;
+                            if(i==0){
+                                member_id=id;
+                                //console.log('Es null ' + i);
+                            }
+                            if(member_id==id){
+                                //console.log('mismo member '+ i);
+                                holes.push({
+                                    hole_number: hole_number,
+                                    par: par,
+                                });
+                                if(hole_number==18){
+                                    //console.log('Inserta miembro');
+                                    //console.log(holes);
+                                    members.push({
+                                        id,
+                                        player: {
+                                            id: player_id,
+                                            nick_name: nick_name,
+                                            photo: photo,
+                                        },
+                                        tee: {
+                                            id: tee_id,
+                                            name: name,
+                                            color: color
+                                        },
+                                        holes: holes,
+                                        nick_name,
+                                        photo,
+                                        adv_h1,
+                                        adv_h2,
+                                        adv_h3,
+                                        adv_h4,
+                                        adv_h5,
+                                        adv_h6,
+                                        adv_h7,
+                                        adv_h8,
+                                        adv_h9,
+                                        adv_h10,
+                                        adv_h11,
+                                        adv_h12,
+                                        adv_h13,
+                                        adv_h14,
+                                        adv_h15,
+                                        adv_h16,
+                                        adv_h17,
+                                        adv_h18,
+                                        round_id,
+                                        handicap,
+                                        id_sync,
+                                        ultimate_sync
+                                    });
+                                }
+                            }else{
+                                //console.log('diferente member');
+                                member_id=row.id;
+                                holes=[];
+                                holes.push({
+                                    hole_number: hole_number,
+                                    par: par,
+                                });
+                            }
+                        }
+                        resolve(members);
+                    }); 
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
     listMembersByRoundIdHole(hole,round_id) {
         return new Promise((resolve) => {
             const members = [];
@@ -1917,6 +2005,25 @@ export default class Database {
                     });
                 }).then((result) => {
                    // this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    deleteMemberByPlayerAndRound(player_id, round_id) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('DELETE FROM round_members WHERE player_id=? AND round_id= ?', [player_id, round_id]).then(([tx, results]) => {
+                        console.log(results);
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    // this.closeDatabase(db);
                 }).catch((err) => {
                     console.log(err);
                 });
