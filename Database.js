@@ -37,7 +37,7 @@ export default class Database {
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS single_nassau_wagers(id INTEGER PRIMARY KEY AUTOINCREMENT, automatic_presses_every INTEGER, front_9 INTEGER, back_9 INTEGER, match INTEGER, total_18 INTEGER, carry INTEGER, medal INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS team_nassau_wagers(id INTEGER PRIMARY KEY AUTOINCREMENT, automatic_presses_every INTEGER, front_9 INTEGER, back_9 INTEGER, match INTEGER, total_18 INTEGER, carry INTEGER, medal INTEGER, who_gets_the_adv_strokes VARCHAR(20), id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS rounds(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(150), course_id INTEGER, date DATE, hcp_adjustment FLOAT, online_key VARCHAR(250), starting_hole INTEGER, adv_b9_f9 TINYINT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
-                                tx.executeSql('CREATE TABLE IF NOT EXISTS round_members(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, nick_name VARCHAR(10), photo VARCHAR(200), tee_id INTEGER, round_id INTEGER, handicap FLOAT, strokes_h1 INTEGER, adv_h1 INTEGER, strokes_h2 INTEGER, adv_h2 INTEGER, strokes_h3 INTEGER, adv_h3 INTEGER, strokes_h4 INTEGER, adv_h4 INTEGER, strokes_h5 INTEGER, adv_h5 INTEGER, strokes_h6 INTEGER, adv_h6 INTEGER, strokes_h7 INTEGER, adv_h7 INTEGER, strokes_h8 INTEGER, adv_h8 INTEGER, strokes_h9 INTEGER, adv_h9 INTEGER, strokes_h10 INTEGER, adv_h10 INTEGER, strokes_h11 INTEGER, adv_h11 INTEGER, strokes_h12 INTEGER, adv_h12 INTEGER, strokes_h13 INTEGER, adv_h13 INTEGER, strokes_h14 INTEGER, adv_h14 INTEGER, strokes_h15 INTEGER, adv_h15 INTEGER, strokes_h16 INTEGER, adv_h16 INTEGER, strokes_h17 INTEGER, adv_h17 INTEGER, strokes_h18 INTEGER, adv_h18 INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS round_members(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, nick_name VARCHAR(10), photo VARCHAR(200), tee_id INTEGER, round_id INTEGER, handicap FLOAT, strokes_h1 INTEGER, strokes_h2 INTEGER, strokes_h3 INTEGER, strokes_h4 INTEGER, strokes_h5 INTEGER, strokes_h6 INTEGER, strokes_h7 INTEGER, strokes_h8 INTEGER, strokes_h9 INTEGER, strokes_h10 INTEGER, strokes_h11 INTEGER, strokes_h12 INTEGER, strokes_h13 INTEGER, strokes_h14 INTEGER, strokes_h15 INTEGER, strokes_h16 INTEGER, strokes_h17 INTEGER, strokes_h18 INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                             }).then(() => {
                                 resolve(db);
                                 //console.log("Table created successfully");
@@ -200,7 +200,7 @@ export default class Database {
                         for (let i = 0; i < len; i++) {
                             let row = results.rows.item(i);
                             console.log(`Member ID: ${row.id}`);
-                            const { color, handicap, id, name, nick_name, photo, adv_h1, adv_h2, adv_h3, adv_h4, adv_h5, adv_h6, adv_h7, adv_h8, adv_h9, adv_h10, adv_h11, adv_h12, adv_h13, adv_h14, adv_h15, adv_h16, adv_h17, adv_h18, player_id, tee_id, id_sync, ultimate_sync } = row;
+                            const { color, handicap, id, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync } = row;
                             members.push({
                                 id,
                                 player: {
@@ -215,24 +215,6 @@ export default class Database {
                                 },
                                 nick_name,
                                 photo,
-                                adv_h1, 
-                                adv_h2, 
-                                adv_h3, 
-                                adv_h4, 
-                                adv_h5, 
-                                adv_h6, 
-                                adv_h7, 
-                                adv_h8, 
-                                adv_h9, 
-                                adv_h10, 
-                                adv_h11, 
-                                adv_h12, 
-                                adv_h13, 
-                                adv_h14, 
-                                adv_h15, 
-                                adv_h16, 
-                                adv_h17, 
-                                adv_h18, 
                                 round_id,  
                                 handicap,
                                 id_sync, 
@@ -253,6 +235,220 @@ export default class Database {
         });
     }
 
+    listMembersByRoundIdWithHoles(round_id) {
+        return new Promise((resolve) => {
+            const members = [];
+            let holes = [];
+            let member_id = null;
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT round_members.id, round_members.player_id, round_members.nick_name, round_members.photo, round_members.tee_id, round_members.strokes_h1, round_members.strokes_h2, round_members.strokes_h3, round_members.strokes_h4, round_members.strokes_h5, round_members.strokes_h6, round_members.strokes_h7, round_members.strokes_h8, round_members.strokes_h9, round_members.strokes_h10, round_members.strokes_h11, round_members.strokes_h12, round_members.strokes_h13, round_members.strokes_h14, round_members.strokes_h15, round_members.strokes_h16, round_members.strokes_h17, round_members.strokes_h18, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name as player_nick_name, players.photo as player_photo, holes.par, holes.hole_number, holes.adv, holes.yards FROM round_members, tees, players, holes WHERE tees.id=round_members.tee_id AND holes.tee_id=round_members.tee_id AND players.id=round_members.player_id AND round_members.round_id=? ORDER BY round_members.id, holes.hole_number', [round_id]).then(([tx, results]) => {
+                        console.log("============================ Query completed ========================================");
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            const { color, handicap, id, name, nick_name, photo, strokes_h1, strokes_h2, strokes_h3, strokes_h4, strokes_h5, strokes_h6, strokes_h7, strokes_h8, strokes_h9, strokes_h10, strokes_h11, strokes_h12, strokes_h13, strokes_h14, strokes_h15, strokes_h16, strokes_h17, strokes_h18, player_id, tee_id, hole_number, adv, par, id_sync, ultimate_sync } = row;
+                            if (i == 0) {
+                                member_id = id;
+                                //console.log('Es null ' + i);
+                            }
+                            if (member_id == id) {
+                                //console.log('mismo member '+ i);
+                                switch (hole_number) {
+                                    case 1:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h1
+                                        });
+                                        break;
+                                    case 2:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h2
+                                        });
+                                        break;
+                                    case 3:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h3
+                                        });
+                                        break;
+                                    case 4:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h4
+                                        });
+                                        break;
+                                    case 5:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h5
+                                        });
+                                        break;
+                                    case 6:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h6
+                                        });
+                                        break;
+                                    case 7:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h7
+                                        });
+                                        break;
+                                    case 8:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h8
+                                        });
+                                        break;
+                                    case 9:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h9
+                                        });
+                                        break;
+                                    case 10:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h10
+                                        });
+                                        break;
+                                    case 11:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h11
+                                        });
+                                        break;
+                                    case 12:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h12
+                                        });
+                                        break;
+                                    case 13:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h13
+                                        });
+                                        break;
+                                    case 14:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h14
+                                        });
+                                        break;
+                                    case 15:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h15
+                                        });
+                                        break;
+                                    case 16:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h16
+                                        });
+                                        break;
+                                    case 17:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h17
+                                        });
+                                        break;
+                                    case 18:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h18
+                                        });
+                                        members.push({
+                                            id,
+                                            player: {
+                                                id: player_id,
+                                                nick_name: nick_name,
+                                                photo: photo,
+                                            },
+                                            tee: {
+                                                id: tee_id,
+                                                name: name,
+                                                color: color
+                                            },
+                                            holes: holes,
+                                            nick_name,
+                                            photo,
+                                            round_id,
+                                            handicap,
+                                            id_sync,
+                                            ultimate_sync
+                                        });
+                                        break;
+                                    default:
+                                        //resolve('Error hole number is not valid');
+                                        break;
+                                }
+
+                            } else {
+                                //console.log('diferente member');
+                                member_id = row.id;
+                                holes = [];
+                                holes.push({
+                                    hole_number: hole_number,
+                                    par: par,
+                                    adv: adv,
+                                    strokes: strokes_h1
+                                });
+                            }
+                        }
+                        resolve(members);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
     listMembersByRoundIdJOIN(round_id) {
         return new Promise((resolve) => {
             const members = [];
@@ -260,64 +456,188 @@ export default class Database {
             let member_id=null;
             this.initDB().then((db) => {
                 db.transaction((tx) => {
-                    tx.executeSql('SELECT round_members.id, round_members.player_id, round_members.nick_name, round_members.photo, round_members.tee_id, round_members.adv_h1, round_members.adv_h2, round_members.adv_h3, round_members.adv_h4, round_members.adv_h5, round_members.adv_h6, round_members.adv_h7, round_members.adv_h8, round_members.adv_h9, round_members.adv_h10, round_members.adv_h11, round_members.adv_h12, round_members.adv_h13, round_members.adv_h14, round_members.adv_h15, round_members.adv_h16, round_members.adv_h17, round_members.adv_h18, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name as player_nick_name, players.photo as player_photo, holes.par, holes.hole_number, holes.adv, holes.yards FROM round_members, tees, players, holes WHERE tees.id=round_members.tee_id AND holes.tee_id=round_members.tee_id AND players.id=round_members.player_id AND round_members.round_id=? ORDER BY round_members.id, holes.hole_number', [round_id]).then(([tx, results]) => {
+                    tx.executeSql('SELECT round_members.id, round_members.player_id, round_members.nick_name, round_members.photo, round_members.tee_id, round_members.strokes_h1, round_members.strokes_h2, round_members.strokes_h3, round_members.strokes_h4, round_members.strokes_h5, round_members.strokes_h6, round_members.strokes_h7, round_members.strokes_h8, round_members.strokes_h9, round_members.strokes_h10, round_members.strokes_h11, round_members.strokes_h12, round_members.strokes_h13, round_members.strokes_h14, round_members.strokes_h15, round_members.strokes_h16, round_members.strokes_h17, round_members.strokes_h18, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name as player_nick_name, players.photo as player_photo, holes.par, holes.hole_number, holes.adv, holes.yards FROM round_members, tees, players, holes WHERE tees.id=round_members.tee_id AND holes.tee_id=round_members.tee_id AND players.id=round_members.player_id AND round_members.round_id=? ORDER BY round_members.id, holes.hole_number', [round_id]).then(([tx, results]) => {
                         console.log("============================ Query completed ========================================");
                         var len = results.rows.length;
                         for (let i = 0; i < len; i++) {
                             let row = results.rows.item(i);
-                            const { color, handicap, id, name, nick_name, photo, adv_h1, adv_h2, adv_h3, adv_h4, adv_h5, adv_h6, adv_h7, adv_h8, adv_h9, adv_h10, adv_h11, adv_h12, adv_h13, adv_h14, adv_h15, adv_h16, adv_h17, adv_h18, player_id, tee_id, hole_number, par, id_sync, ultimate_sync } = row;
+                            const { color, handicap, id, name, nick_name, photo, strokes_h1, strokes_h2, strokes_h3, strokes_h4, strokes_h5, strokes_h6, strokes_h7, strokes_h8, strokes_h9, strokes_h10, strokes_h11, strokes_h12, strokes_h13, strokes_h14, strokes_h15, strokes_h16, strokes_h17, strokes_h18, player_id, tee_id, hole_number, adv, par, id_sync, ultimate_sync } = row;
                             if(i==0){
                                 member_id=id;
                                 //console.log('Es null ' + i);
                             }
                             if(member_id==id){
                                 //console.log('mismo member '+ i);
-                                holes.push({
-                                    hole_number: hole_number,
-                                    par: par,
-                                });
-                                if(hole_number==18){
-                                    //console.log('Inserta miembro');
-                                    //console.log(holes);
-                                    members.push({
-                                        id,
-                                        player: {
-                                            id: player_id,
-                                            nick_name: nick_name,
-                                            photo: photo,
-                                        },
-                                        tee: {
-                                            id: tee_id,
-                                            name: name,
-                                            color: color
-                                        },
-                                        holes: holes,
-                                        nick_name,
-                                        photo,
-                                        adv_h1,
-                                        adv_h2,
-                                        adv_h3,
-                                        adv_h4,
-                                        adv_h5,
-                                        adv_h6,
-                                        adv_h7,
-                                        adv_h8,
-                                        adv_h9,
-                                        adv_h10,
-                                        adv_h11,
-                                        adv_h12,
-                                        adv_h13,
-                                        adv_h14,
-                                        adv_h15,
-                                        adv_h16,
-                                        adv_h17,
-                                        adv_h18,
-                                        round_id,
-                                        handicap,
-                                        id_sync,
-                                        ultimate_sync
-                                    });
+                                switch (hole_number) {
+                                    case 1:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h1
+                                        });
+                                        break;
+                                    case 2:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h2
+                                        });
+                                        break;
+                                    case 3:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h3
+                                        });
+                                        break;
+                                    case 4:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h4
+                                        });
+                                        break;
+                                    case 5:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h5
+                                        });
+                                        break;
+                                    case 6:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h6
+                                        });
+                                        break;
+                                    case 7:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h7
+                                        });
+                                        break;
+                                    case 8:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h8
+                                        });
+                                        break;
+                                    case 9:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h9
+                                        });
+                                        break;
+                                    case 10:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h10
+                                        });
+                                        break;
+                                    case 11:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h11
+                                        });
+                                        break;
+                                    case 12:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h12
+                                        });
+                                        break;
+                                    case 13:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h13
+                                        });
+                                        break;
+                                    case 14:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h14
+                                        });
+                                        break;
+                                    case 15:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h15
+                                        });
+                                        break;
+                                    case 16:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h16
+                                        });
+                                        break;
+                                    case 17:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h17
+                                        });
+                                        break;
+                                    case 18:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h18
+                                        });
+                                        members.push({
+                                            id,
+                                            player: {
+                                                id: player_id,
+                                                nick_name: nick_name,
+                                                photo: photo,
+                                            },
+                                            tee: {
+                                                id: tee_id,
+                                                name: name,
+                                                color: color
+                                            },
+                                            holes: holes,
+                                            nick_name,
+                                            photo,
+                                            round_id,
+                                            handicap,
+                                            id_sync,
+                                            ultimate_sync
+                                        });
+                                        break;
+                                    default:
+                                        //resolve('Error hole number is not valid');
+                                        break;
                                 }
+                                
                             }else{
                                 //console.log('diferente member');
                                 member_id=row.id;
@@ -325,6 +645,8 @@ export default class Database {
                                 holes.push({
                                     hole_number: hole_number,
                                     par: par,
+                                    adv: adv,
+                                    strokes: strokes_h1
                                 });
                             }
                         }
@@ -1009,8 +1331,8 @@ export default class Database {
             });
         });
     }
-
-    updateScoreMemberInHole(hole,member){
+ 
+   updateScoreMemberInHole(hole,member){
         return new Promise((resolve) => {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
@@ -1522,7 +1844,7 @@ export default class Database {
                         resolve(results);
                     });
                 }).then((result) => {
-                    this.closeDatabase(db);
+                    //this.closeDatabase(db);
                 }).catch((err) => {
                     console.log(err);
                 });
@@ -1550,11 +1872,33 @@ export default class Database {
         });
     }
 
+    roundById(id){
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT * FROM rounds WHERE id = ?', [id]).then(([tx, results]) => {
+                        // //console.log(results);
+                        if (results.rows.length > 0) {
+                            let row = results.rows.item(0);
+                            resolve(row);
+                        }
+                    });
+                }).then((result) => {
+                    resolve(result);
+                }).catch((err) => {
+                    //console.log(err);
+                });
+            }).catch((err) => {
+                //console.log(err);
+            });
+        });
+    }
+
     addMember(member) {
         return new Promise((resolve) => {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
-                    tx.executeSql('INSERT INTO round_members(player_id, nick_name, photo, tee_id, round_id, adv_h1, adv_h2, adv_h3, adv_h4, adv_h5, adv_h6, adv_h7, adv_h8, adv_h9, adv_h10, adv_h11, adv_h12, adv_h13, adv_h14, adv_h15, adv_h16, adv_h17, adv_h18, handicap, id_sync, ultimate_sync) VALUES (? , ?, ?, ?, ? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [member.player_id, member.nick_name, member.photo, member.tee_id, member.round_id, member.adv_h1, member.adv_h2, member.adv_h3, member.adv_h4, member.adv_h5, member.adv_h6, member.adv_h7, member.adv_h8, member.adv_h9, member.adv_h10, member.adv_h11, member.adv_h12, member.adv_h13, member.adv_h14, member.adv_h15, member.adv_h16, member.adv_h17, member.adv_h18, member.handicap, member.id_sync, member.ultimate_sync]).then(([tx, results]) => {
+                    tx.executeSql('INSERT INTO round_members(player_id, nick_name, photo, tee_id, round_id, handicap, id_sync, ultimate_sync) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [member.player_id, member.nick_name, member.photo, member.tee_id, member.round_id, member.handicap, member.id_sync, member.ultimate_sync]).then(([tx, results]) => {
                         resolve(results);
                     });
                 }).then((result) => {
