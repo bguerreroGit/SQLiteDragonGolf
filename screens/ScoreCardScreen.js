@@ -69,6 +69,16 @@ class ScoreCardScreen extends Component {
             i = 0;
           }
         }
+        if (round.adv_b9_f9 == 1 && round.starting_hole > 1) {
+          alert('Swicht activado');
+          for (let j = 0; j < members[index].holes.length; j++) {
+            if(members[index].holes[j].adv % 2 == 0){
+              members[index].holes[j].adv -= 1;
+            }else {
+              members[index].holes[j].adv += 1;
+            }
+          }
+        }
         console.log('===================== ADVANTAGE STROKES ===================');
         console.log(advStrokes);
         members[index].advStrokes=advStrokes;
@@ -176,7 +186,14 @@ class ScoreCardScreen extends Component {
                             }}></View>
                             <Text style={{
                               fontSize: 12
-                            }}> {(item.handicap * this.state.round.hcp_adjustment).toFixed(0)}</Text>
+                            }}> 
+                              <Text>
+                                {item.handicap}{"\n"}
+                              </Text>
+                              <Text>
+                                {(item.handicap * this.state.round.hcp_adjustment).toFixed(0)}
+                              </Text>
+                            </Text>
                           </View>
                         </View>
                         {

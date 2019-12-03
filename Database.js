@@ -38,6 +38,10 @@ export default class Database {
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS team_nassau_wagers(id INTEGER PRIMARY KEY AUTOINCREMENT, automatic_presses_every INTEGER, front_9 INTEGER, back_9 INTEGER, match INTEGER, total_18 INTEGER, carry INTEGER, medal INTEGER, who_gets_the_adv_strokes VARCHAR(20), id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS rounds(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(150), course_id INTEGER, date DATE, hcp_adjustment FLOAT, online_key VARCHAR(250), starting_hole INTEGER, adv_b9_f9 TINYINT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS round_members(id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, nick_name VARCHAR(10), photo VARCHAR(200), tee_id INTEGER, round_id INTEGER, handicap FLOAT, strokes_h1 INTEGER, strokes_h2 INTEGER, strokes_h3 INTEGER, strokes_h4 INTEGER, strokes_h5 INTEGER, strokes_h6 INTEGER, strokes_h7 INTEGER, strokes_h8 INTEGER, strokes_h9 INTEGER, strokes_h10 INTEGER, strokes_h11 INTEGER, strokes_h12 INTEGER, strokes_h13 INTEGER, strokes_h14 INTEGER, strokes_h15 INTEGER, strokes_h16 INTEGER, strokes_h17 INTEGER, strokes_h18 INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                //tx.executeSql('DROP TABLE bets_single_nassau');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS bets_single_nassau(id INTEGER PRIMARY KEY AUTOINCREMENT, round_id INTEGER, member_a_id INTEGER, member_b_id INTEGER, member_a VARCHAR(10), member_b VARCHAR(10), automatic_press_every INTEGER, front_9 FLOAT, back_9 FLOAT, match FLOAT, carry FLOAT, medal FLOAT, adv_strokes FLOAT, manually_override_adv TINYINT, manually_adv_strokes FLOAT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS bets_team_nassau(id INTEGER PRIMARY KEY AUTOINCREMENT, round_id INTEGER, member_a_id INTEGER, member_b_id INTEGER, member_c_id INTEGER, member_d_id INTEGER, member_a VARCHAR(10), member_b VARCHAR(10), member_c VARCHAR(10), member_d VARCHAR(10), automatic_press_every INTEGER, front_9 FLOAT, back_9 FLOAT, match FLOAT, carry FLOAT, medal FLOAT, adv_strokes FLOAT, manually_override_adv TINYINT, manually_adv_strokes FLOAT, who_gets_the_adv_strokes VARCHAR(20), id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS players_confrontation(member_a_id INTEGER, member_b_id INTEGER, adv_strokes FLOAT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                             }).then(() => {
                                 resolve(db);
                                 //console.log("Table created successfully");
@@ -147,6 +151,359 @@ export default class Database {
         });
     }
 
+    listBetsSingleNassau(round_id) {
+        return new Promise((resolve) => {
+            const betsSingleNassau = [];
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT * FROM bets_single_nassau WHERE round_id= ?', [round_id]).then(([tx, results]) => {
+                        console.log("Query completed");
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            //const { adv_strokes, automatic_press_every, back_9, carry, front_9, id, id_sync, manually_adv_strokes, manually_override_adv, match, medal, memberA , memberB, round_id, ultimate_sync } = row;
+                            betsSingleNassau.push(row);
+                        } 
+                        resolve(betsSingleNassau);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    listBetsTeamNassau(round_id) {
+        return new Promise((resolve) => {
+            const betsTeamNassau = [];
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT * FROM bets_team_nassau WHERE round_id= ?', [round_id]).then(([tx, results]) => {
+                        console.log("Query completed");
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            betsTeamNassau.push(row);
+                        } 
+                        resolve(betsTeamNassau);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    getNickNameMember(id) {
+        return new Promise((resolve) => {
+            const betsSingleNassau = [];
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT nick_name FROM round_members WHERE id= ?', [id]).then(([tx, results]) => {
+                        console.log("Query completed");
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            betsSingleNassau.push(row);
+                        }
+                        resolve(betsSingleNassau);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+    //================================== PLAYERS CONFROTATIONS ====================//
+    listPlayersConfrontations(member_a_id) {
+        return new Promise((resolve) => {
+            const playersConfrontations = [];
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT * FROM players_confrontation WHERE member_a_id= ?', [member_a_id]).then(([tx, results]) => {
+                        console.log("Query completed");
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            console.log('============================= ROW =======================');
+                            console.log(row);
+                            //const { adv_strokes, automatic_press_every, back_9, carry, front_9, id, id_sync, manually_adv_strokes, manually_override_adv, match, medal, memberA, memberB, round_id, ultimate_sync } = row;
+                            playersConfrontations.push(row);
+                        }
+                        resolve(playersConfrontations);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    addPlayerConfrontation(confrontation) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('INSERT INTO players_confrontation(member_a_id, member_b_id, adv_strokes, id_sync, ultimate_sync) VALUES (?, ?, ?, ?, ?)', [confrontation.member_a_id, confrontation.member_b_id, confrontation.adv_strokes, confrontation.id_sync, confrontation.ultimate_sync]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    // this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    updatePlayerConfrontation(confrontation) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('UPDATE players_confrontation SET member_a_id= ?, member_b_id= ?, adv_strokes= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [confrontation.member_a_id, confrontation.member_b_id, confrontation.adv_strokes, confrontation.id_sync, confrontation.ultimate_sync, confrontation.id]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+    //================================== PLAYERS CONFROTATIONS ====================//
+    getMemberByIdWithHoles(id) {
+        return new Promise((resolve) => {
+            const members = [];
+            let holes = [];
+            let member_id = null;
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT round_members.id, round_members.player_id, round_members.nick_name, round_members.photo, round_members.tee_id, round_members.strokes_h1, round_members.strokes_h2, round_members.strokes_h3, round_members.strokes_h4, round_members.strokes_h5, round_members.strokes_h6, round_members.strokes_h7, round_members.strokes_h8, round_members.strokes_h9, round_members.strokes_h10, round_members.strokes_h11, round_members.strokes_h12, round_members.strokes_h13, round_members.strokes_h14, round_members.strokes_h15, round_members.strokes_h16, round_members.strokes_h17, round_members.strokes_h18, round_members.handicap, round_members.id_sync, round_members.ultimate_sync, tees.name, tees.color, players.nick_name as player_nick_name, players.photo as player_photo, holes.par, holes.hole_number, holes.adv, holes.yards FROM round_members, tees, players, holes WHERE tees.id=round_members.tee_id AND holes.tee_id=round_members.tee_id AND players.id=round_members.player_id AND round_members.id=? ORDER BY holes.hole_number', [id]).then(([tx, results]) => {
+                        console.log("============================ Query completed ========================================");
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            const { color, handicap, id, name, nick_name, photo, strokes_h1, strokes_h2, strokes_h3, strokes_h4, strokes_h5, strokes_h6, strokes_h7, strokes_h8, strokes_h9, strokes_h10, strokes_h11, strokes_h12, strokes_h13, strokes_h14, strokes_h15, strokes_h16, strokes_h17, strokes_h18, player_id, tee_id, hole_number, adv, par, id_sync, ultimate_sync } = row;
+                            if (i == 0) {
+                                member_id = id;
+                                //console.log('Es null ' + i);
+                            }
+                            if (member_id == id) {
+                                //console.log('mismo member '+ i);
+                                switch (hole_number) {
+                                    case 1:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h1
+                                        });
+                                        break;
+                                    case 2:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h2
+                                        });
+                                        break;
+                                    case 3:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h3
+                                        });
+                                        break;
+                                    case 4:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h4
+                                        });
+                                        break;
+                                    case 5:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h5
+                                        });
+                                        break;
+                                    case 6:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h6
+                                        });
+                                        break;
+                                    case 7:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h7
+                                        });
+                                        break;
+                                    case 8:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h8
+                                        });
+                                        break;
+                                    case 9:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h9
+                                        });
+                                        break;
+                                    case 10:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h10
+                                        });
+                                        break;
+                                    case 11:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h11
+                                        });
+                                        break;
+                                    case 12:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h12
+                                        });
+                                        break;
+                                    case 13:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h13
+                                        });
+                                        break;
+                                    case 14:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h14
+                                        });
+                                        break;
+                                    case 15:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h15
+                                        });
+                                        break;
+                                    case 16:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h16
+                                        });
+                                        break;
+                                    case 17:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h17
+                                        });
+                                        break;
+                                    case 18:
+                                        holes.push({
+                                            hole_number: hole_number,
+                                            par: par,
+                                            adv: adv,
+                                            strokes: strokes_h18
+                                        });
+                                        members.push({
+                                            id,
+                                            player: {
+                                                id: player_id,
+                                                nick_name: nick_name,
+                                                photo: photo,
+                                            },
+                                            tee: {
+                                                id: tee_id,
+                                                name: name,
+                                                color: color
+                                            },
+                                            holes: holes,
+                                            nick_name,
+                                            photo,
+                                            handicap,
+                                            id_sync,
+                                            ultimate_sync
+                                        });
+                                        break;
+                                    default:
+                                        //resolve('Error hole number is not valid');
+                                        break;
+                                }
+
+                            } else {
+                                //console.log('diferente member');
+                                member_id = row.id;
+                                holes = [];
+                                holes.push({
+                                    hole_number: hole_number,
+                                    par: par,
+                                    adv: adv,
+                                    strokes: strokes_h1
+                                });
+                            }
+                        }
+                        resolve(members);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
     listRoundJOIN() {
         return new Promise((resolve) => {
             const rounds = [];
@@ -203,6 +560,7 @@ export default class Database {
                             const { color, handicap, id, name, nick_name, photo, player_id, tee_id, id_sync, ultimate_sync } = row;
                             members.push({
                                 id,
+                                player_id,
                                 player: {
                                     id: player_id,
                                     nick_name: nick_name,
@@ -2058,6 +2416,60 @@ export default class Database {
                     });
                 }).then((result) => {
                     // this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    addBetSingleNassau(single) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('INSERT INTO bets_single_nassau(round_id, member_a_id, member_b_id, member_a, member_b, automatic_press_every, front_9, back_9, match, carry, medal, adv_strokes, manually_override_adv, manually_adv_strokes, id_sync, ultimate_sync) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?)', [single.round_id, single.member_a_id, single.member_b_id, single.member_a, single.member_b, single.automatic_press_every, single.front_9, single.back_9, single.match, single.carry, single.medal, single.adv_strokes, single.manually_override_adv, single.manually_adv_strokes, single.id_sync, single.ultimate_sync]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    // this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    addBetTeamNassau(team) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('INSERT INTO bets_team_nassau(round_id, member_a_id, member_b_id,member_c_id, member_d_id, member_a, member_b, member_c, member_d, automatic_press_every, front_9, back_9, match, carry, medal, adv_strokes, manually_override_adv, manually_adv_strokes, who_gets_the_adv_strokes, id_sync, ultimate_sync) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [team.round_id, team.member_a_id, team.member_b_id, team.member_c_id, team.member_d_id, team.member_a, team.member_b, team.member_c, team.member_d, team.automatic_press_every, team.front_9, team.back_9, team.match, team.carry, team.medal, team.adv_strokes, team.manually_override_adv, team.manually_adv_strokes, team.who_gets_the_adv_strokes, team.id_sync, team.ultimate_sync]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    // this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    updateBetSingleNassau(single) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('UPDATE bets_single_nassau SET member_a_id= ?, member_b_id= ?, member_a= ?, member_b= ?, automatic_press_every = ?, front_9= ?, back_9= ?, match= ?, carry= ?, medal= ?, adv_strokes= ?, manually_override_adv= ?, manually_adv_strokes= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [single.member_a_id, single.member_b_id, single.member_a, single.member_b, single.automatic_press_every, single.front_9, single.back_9, single.match, single.carry, single.medal, single.adv_strokes, single.manually_override_adv, single.manually_adv_strokes, single.id_sync, single.ultimate_sync, single.id]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
                 }).catch((err) => {
                     console.log(err);
                 });

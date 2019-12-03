@@ -68,6 +68,9 @@ import ScoreHoleEighteenScreen from './screens/ScoreHoleEighteenScreen';
 import MoreHomeScreen from './screens/MoreHomeScreen';
 import BetsHomeScreen from './screens/BetsHomeScreen';
 import ScoreCardScreen from './screens/ScoreCardScreen';
+import AddSingleNassauScreen from './screens/AddSingleNassauScreen';
+import SingleNassauScoreCard from './screens/SingleNassauScoreCard';
+import AddTeamNassauScreen from './screens/AddTeamNassauScreen';
 
 const RoundPlayersStack = createStackNavigator(
   {
@@ -125,6 +128,21 @@ const BetsStack = createStackNavigator(
       navigationOptions: {
         title: 'Bets'
       }
+    },
+    AddTeamNassau: {
+      screen: AddTeamNassauScreen,
+      navigationOptions: {
+        title: 'Team Nassau'
+      }
+    },
+    AddSingleNassau:{
+      screen: AddSingleNassauScreen,
+      navigationOptions: {
+        title: 'Single Nassau'
+      }
+    },
+    SingleNassauScoreCard: {
+      screen: SingleNassauScoreCard
     }
   },
   {

@@ -119,7 +119,8 @@ class ConfigureRoundScreen extends PureComponent {
       id_sync: this.state.id_sync,
       ultimate_sync: moment().format('YYYY-MM-DD HH:mm:ss'),
     };
-
+    console.log('================= DATA =================');
+    console.log(data);
     db.updateRound(data).then((result) => {
       console.log('Result: ', result);
     }).catch(error => {
@@ -131,7 +132,9 @@ class ConfigureRoundScreen extends PureComponent {
     let porcentaje = this.buttons[selectedIndex];
     let hcp_adjustment= porcentaje.split('%')[0];
     console.log('HCP ADJUSTMENT: ', (hcp_adjustment/100));
-    this.setState({ selectedIndex });
+    this.setState({ 
+      selectedIndex,
+      hcp_adjustment: (hcp_adjustment / 100) });
     let data = {
       id: this.state.id,
       name: this.state.name,
