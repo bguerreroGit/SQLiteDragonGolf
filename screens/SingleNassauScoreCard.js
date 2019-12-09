@@ -87,8 +87,8 @@ class ScoreCardScreen extends Component {
         member_b.front9=bFront9AndBack9.front9;
         member_a.back9=aFront9AndBack9.back9;
         member_b.back9=bFront9AndBack9.back9;
-        let front9Presses=this.calculeBack9Presses(member_a.front9, member_a.advStrokes, member_b.front9, member_b.advStrokes);
-        let back9Presses=this.calculeBack9Presses(member_a.back9, member_a.advStrokes, member_b.back9, member_b.advStrokes);
+        let front9Presses=this.calculeBack9Presses(member_a.front9, member_a.advStrokes, member_b.front9, member_b.advStrokes, single);
+        let back9Presses=this.calculeBack9Presses(member_a.back9, member_a.advStrokes, member_b.back9, member_b.advStrokes, single);
         this.setState({
             member_a: member_a,
             member_b: member_b,
@@ -158,13 +158,15 @@ class ScoreCardScreen extends Component {
         return front9AndBack9Object;
     }
 
-    calculeBack9Presses(back9_a, advantage_a, back9_b, advantage_b) {
+    calculeBack9Presses(back9_a, advantage_a, back9_b, advantage_b, single) {
         let back9Presses = [null, null, null, null, null, null, null, null, null];
         let anterior=null;
         let strokes_a = 0;
         let strokes_b = 0;
         let advIndex = 0;
-        let auxPressesArray = [];
+        let auxPressesArray = [
+            [null, null, null, null, null, null, null, null, null],
+        ];
         let indexPress = 0;
         for (let index = 0; index < 9; index++) {
             if (back9_a[index].strokes==null){
@@ -183,14 +185,20 @@ class ScoreCardScreen extends Component {
                 strokes_b = back9_b[index].strokes - advantage_b[advIndex];
                 console.log('=================== STROKES JUGADOR B ===============');
                 console.log(' -Golpes total: ' + strokes_b);
-                if(auxPressesArray.length==0){
-                    auxPressesArray.push(back9Presses);
+                if(auxPressesArray.length==1){
                     if (strokes_a < strokes_b) {
                         auxPressesArray[0][index] = 1;
                     } else if (strokes_b < strokes_a) {
                         auxPressesArray[0][index] = -1;
+
                     } else {
                         auxPressesArray[0][index] = 0;
+                    }
+                    if (auxPressesArray[0][index] != 0 && (auxPressesArray[0][index]) % single.automatic_press_every == 0) {
+                        console.log('========================== SE ABRE LA PRIMER PRESION ========================');
+                        indexPress += 1;
+                        back9Presses[index] = 0;
+                        auxPressesArray.push(back9Presses);
                     }
                 }else {
                     if (strokes_a < strokes_b) {
@@ -199,7 +207,7 @@ class ScoreCardScreen extends Component {
                             console.log('Valor:  ' + auxPressesArray[j][anterior] + ' nuevo valor: ' + auxPressesArray[j][index]);
                         }
 
-                        if (auxPressesArray[indexPress][index] > 0 && (auxPressesArray[indexPress][index]) % 2 == 0) {
+                        if (auxPressesArray[indexPress][index] > 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
                             console.log('========================== Se abre presion ========================');
                             indexPress += 1;
                             back9Presses[index] = 0;
@@ -211,7 +219,7 @@ class ScoreCardScreen extends Component {
                             auxPressesArray[j][index] = (auxPressesArray[j][anterior] - 1);
                             console.log('Valor:  ' + auxPressesArray[j][anterior] + ' nuevo valor: ' + auxPressesArray[j][index]);
                         }
-                        if (auxPressesArray[indexPress][index] < 0 && (auxPressesArray[indexPress][index]) % 2 == 0) {
+                        if (auxPressesArray[indexPress][index] < 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
                             console.log('=================== Se abre presion negativa =================');
                             indexPress += 1;
                             back9Presses[index] = 0;
@@ -219,6 +227,7 @@ class ScoreCardScreen extends Component {
                         }
                     } else {
                         console.log('======================== SE EMPATAN =========================');
+                        console.log('============ INDEX PRESS: ')
                         for (let j = 0; j <= indexPress; j++) {
                             auxPressesArray[j][index] = auxPressesArray[j][anterior];
                             console.log('Valor:  ' + auxPressesArray[j][anterior] + ' nuevo valor: ' + auxPressesArray[j][index]);
@@ -229,8 +238,6 @@ class ScoreCardScreen extends Component {
             }
             
         }
-        console.log('====================== PRESIONES ====================================');
-        console.log(auxPressesArray);
         return auxPressesArray;
     }
 
@@ -380,7 +387,7 @@ class ScoreCardScreen extends Component {
                             member_a.front9.map((hole, index) => {
                                 let auxLastIndex=0;
                                 return (
-                                    <View style={{ borderWidth: 1, borderColor: 'back', width: 25, height: 80, margin: 1 }}>
+                                    <View style={{ borderWidth: 1, borderColor: 'back', width: 25, height: 100, margin: 1 }}>
                                         {
                                             front9Presses.map((press) => {
                                                 if(press[index]==null){
@@ -393,7 +400,7 @@ class ScoreCardScreen extends Component {
                                                         if(auxLastIndex!=-1){
                                                             return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
                                                         }else 
-                                                        return null;
+                                                            return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
                                                     }else {
                                                         return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
                                                     }
@@ -509,28 +516,14 @@ class ScoreCardScreen extends Component {
                             member_a.front9.map((hole, index) => {
                                 let auxLastIndex=0;
                                 return (
-                                    <View style={{ borderWidth: 1, borderColor: 'back', width: 25, height: 80, margin: 1 }}>
+                                    <View style={{ borderWidth: 1, borderColor: 'back', width: 25, height: 100, margin: 1 }}>
                                         {
                                             back9Presses.map((press) => {
                                                 if (press[index] == null) {
                                                     return null;
                                                 }
                                                 if (press[index] == 0) {
-                                                    if (press[index - 1] == null) {
-                                                        auxLastIndex = 0;
-                                                        console.log('====================== Index direrente de nulo =================');
-                                                        console.log(press.slice(0, index));
-                                                        console.log(press.slice(0, index).reverse());
-                                                        console.log(press.slice(0, index).reverse().findIndex(element => element != null));
-                                                        auxLastIndex = press.slice(0, index).reverse().findIndex(element => element != null);
-                                                        if (auxLastIndex != -1) {
-                                                            return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
-                                                        } else
-                                                            return null;
-                                                    }
-                                                    if (press[index - 1] == 0) {
-                                                        return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
-                                                    }
+                                                    return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
                                                 }
                                                 else if (press[index] < 0) {
                                                     return (<Text style={{ fontSize: 8, textAlign: 'center', color: 'red' }}>{press[index]}</Text>)

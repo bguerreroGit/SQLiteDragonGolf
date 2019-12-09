@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import Database from '../Database';
 import moment from "moment";
 
@@ -49,7 +49,7 @@ class ScoreCardScreen extends Component {
         member_b.advStrokes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         member_c = member_c[0];
         member_c.advStrokes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        member_d = member_b[0];
+        member_d = member_d[0];
         member_d.advStrokes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         console.log('======================== MEMBER A =====================');
         console.log(member_a);
@@ -82,7 +82,6 @@ class ScoreCardScreen extends Component {
             }
         }
         if (round.adv_b9_f9 == 1 && round.starting_hole > 1) {
-            alert('Swicht activado');
             member_a.holes = this.swichAdvantage(member_a.holes);
             member_b.holes = this.swichAdvantage(member_b.holes);
             member_c.holes = this.swichAdvantage(member_c.holes);
@@ -100,16 +99,16 @@ class ScoreCardScreen extends Component {
         member_d.front9 = dFront9AndBack9.front9;
         member_c.back9 = cFront9AndBack9.back9;
         member_d.back9 = dFront9AndBack9.back9;
-        let front9Presses = this.calculeBack9Presses(member_a.front9, member_a.advStrokes, member_b.front9, member_b.advStrokes);
-        let back9Presses = this.calculeBack9Presses(member_a.back9, member_a.advStrokes, member_b.back9, member_b.advStrokes);
+        let front9Presses = this.calculePresses(member_a.front9, member_a.advStrokes, member_b.front9, member_b.advStrokes, member_c.front9, member_c.advStrokes, member_d.front9, member_d.advStrokes, single);
+        //let back9Presses = this.calculePresses(member_a.back9, member_a.advStrokes, member_b.back9, member_b.advStrokes);
         this.setState({
             member_a: member_a,
             member_b: member_b,
             member_c: member_c,
-            member_d: memeber_d,
+            member_d: member_d,
             round: round,
-            front9Presses,
-            back9Presses,
+            front9Presses: [],
+            back9Presses: [],
             isLoading: false
         });
     }
@@ -173,17 +172,19 @@ class ScoreCardScreen extends Component {
         return front9AndBack9Object;
     }
 
-    calculeBack9Presses(back9_a, advantage_a, back9_b, advantage_b) {
+    calculePresses(back9_a, advantage_a, back9_b, advantage_b, back9_c, advantage_c, back9_d, advantage_d, single) {
         let back9Presses = [null, null, null, null, null, null, null, null, null];
         let anterior = null;
         let strokes_a = 0;
         let strokes_b = 0;
+        let strokes_c=0;
+        let strokes_d=0;
         let advIndex = 0;
         let auxPressesArray = [];
         let indexPress = 0;
         for (let index = 0; index < 9; index++) {
             if (back9_a[index].strokes == null) {
-                console.log('============== GOLPES A ' + back9_a[index].strokes + ' hole: ' + back9_b[index].hole_number + '====================');
+                
             } else {
                 if (anterior == null) {
                     anterior = index
@@ -198,15 +199,68 @@ class ScoreCardScreen extends Component {
                 strokes_b = back9_b[index].strokes - advantage_b[advIndex];
                 console.log('=================== STROKES JUGADOR B ===============');
                 console.log(' -Golpes total: ' + strokes_b);
+                advIndex = back9_c[index].adv - 1;
+                strokes_c = back9_c[index].strokes - advantage_c[advIndex];
+                console.log('=================== STROKES JUGADOR C ===============');
+                console.log(' -Golpes total: ' + strokes_c);
+                /*
+                advIndex = back9_d[index].adv - 1;
+                strokes_d = back9_d[index].strokes - advantage_d[advIndex];
+                console.log('=================== STROKES JUGADOR D ===============');
+                console.log(' -Golpes total: ' + strokes_d);
+                */
+                let minTeamOne= null;
+                let minTeamTwo= null;
+                let maxTeamOne= null;
+                let maxTeamTwo= null;
+                //Mayor y menor de los equipos
+                if(strokes_a<=strokes_b){
+                    minTeamOne=strokes_a;
+                    maxTeamOne=strokes_b;
+                }else{
+                    minTeamOne = strokes_b;
+                    maxTeamOne = strokes_a;
+                }
+                if(strokes_c<=strokes_d){
+                    minTeamTwo = strokes_c;
+                    maxTeamTwo = strokes_d;
+                }else {
+                    minTeamTwo = strokes_d;
+                    maxTeamTwo = strokes_c;
+                }
+
                 if (auxPressesArray.length == 0) {
                     auxPressesArray.push(back9Presses);
-                    if (strokes_a < strokes_b) {
+                    if (minTeamOne < minTeamTwo) {
                         auxPressesArray[0][index] = 1;
-                    } else if (strokes_b < strokes_a) {
+                    } else if (minTeamTwo < minTeamOne) {
                         auxPressesArray[0][index] = -1;
                     } else {
                         auxPressesArray[0][index] = 0;
                     }
+
+                    if (auxPressesArray[indexPress][index] > 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
+                        console.log('========================== Se abre presion ========================');
+                        indexPress += 1;
+                        back9Presses[index] = 0;
+                        auxPressesArray.push(back9Presses);
+                    }
+
+                    if (maxTeamOne < maxTeamTwo) {
+                        auxPressesArray[0][index] += 1;
+                    } else if (maxTeamTwo < maxTeamOne) {
+                        auxPressesArray[0][index] -= 1;
+                    } else {
+                        auxPressesArray[0][index] = 0;
+                    }
+                    if (auxPressesArray[indexPress][index] > 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
+                        console.log('========================== Se abre presion ========================');
+                        indexPress += 1;
+                        back9Presses[index] = 0;
+                        auxPressesArray.push(back9Presses);
+                    }
+                    console.log('================= PRESIONES ABIERTAS ====================');
+                    console.log(auxPressesArray);
                 } else {
                     if (strokes_a < strokes_b) {
                         for (let j = 0; j <= indexPress; j++) {
@@ -214,7 +268,7 @@ class ScoreCardScreen extends Component {
                             console.log('Valor:  ' + auxPressesArray[j][anterior] + ' nuevo valor: ' + auxPressesArray[j][index]);
                         }
 
-                        if (auxPressesArray[indexPress][index] > 0 && (auxPressesArray[indexPress][index]) % 2 == 0) {
+                        if (auxPressesArray[indexPress][index] > 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
                             console.log('========================== Se abre presion ========================');
                             indexPress += 1;
                             back9Presses[index] = 0;
@@ -226,7 +280,7 @@ class ScoreCardScreen extends Component {
                             auxPressesArray[j][index] = (auxPressesArray[j][anterior] - 1);
                             console.log('Valor:  ' + auxPressesArray[j][anterior] + ' nuevo valor: ' + auxPressesArray[j][index]);
                         }
-                        if (auxPressesArray[indexPress][index] < 0 && (auxPressesArray[indexPress][index]) % 2 == 0) {
+                        if (auxPressesArray[indexPress][index] < 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
                             console.log('=================== Se abre presion negativa =================');
                             indexPress += 1;
                             back9Presses[index] = 0;
@@ -276,7 +330,7 @@ class ScoreCardScreen extends Component {
         return total;
     }
     render() {
-        const { member_a, member_b, front9Presses, back9Presses } = this.state;
+        const { member_a, member_b, member_c, member_d, front9Presses, back9Presses } = this.state;
         if (this.state.isLoading) {
             return (
                 <View style={styles.activity}>
@@ -285,7 +339,7 @@ class ScoreCardScreen extends Component {
             );
         }
         return (
-            <View style={styles.container}>
+            <ScrollView style={styles.container}>
                 <View>
                     <View style={{ padding: 5 }}>
                         <View>
@@ -379,6 +433,82 @@ class ScoreCardScreen extends Component {
                                     }
                                     <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'center' }}>
                                         <Text style={{ fontWeight: 'bold' }}>{this.getTotalStrokes(member_b.front9, member_b.advStrokes)}</Text>
+                                    </View>
+                                </View>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ width: 40 }}>
+                                        <Text>{member_c.nick_name}</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <View style={{
+                                                backgroundColor: member_c.tee.color,
+                                                width: 5,
+                                                height: 5
+                                            }}></View>
+                                            <Text style={{
+                                                fontSize: 12
+                                            }}>
+                                                <Text>
+                                                    {member_c.handicap}{"\n"}
+                                                </Text>
+                                                <Text>
+                                                    {(member_c.handicap * this.state.round.hcp_adjustment).toFixed(0)}
+                                                </Text>
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    {
+                                        member_c.front9.map(hole => {
+                                            return (
+                                                <View style={{ margin: 1, width: 25 }}>
+                                                    <Text style={{ fontSize: 8, color: 'gray', textAlign: 'center' }}>{hole.adv} </Text>
+                                                    <View style={{ borderWidth: 1, borderColor: 'back' }}>
+                                                        <Text style={{ textAlign: 'center' }}>{hole.strokes}</Text>
+                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_c.advStrokes[(hole.adv - 1)] == 0 ? null : member_c.advStrokes[(hole.adv - 1)]}</Text>
+                                                    </View>
+                                                </View>
+                                            );
+                                        })
+                                    }
+                                    <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'center' }}>
+                                        <Text style={{ fontWeight: 'bold' }}>{this.getTotalStrokes(member_c.front9, member_c.advStrokes)}</Text>
+                                    </View>
+                                </View>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ width: 40 }}>
+                                        <Text>{member_d.nick_name}</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <View style={{
+                                                backgroundColor: member_d.tee.color,
+                                                width: 5,
+                                                height: 5
+                                            }}></View>
+                                            <Text style={{
+                                                fontSize: 12
+                                            }}>
+                                                <Text>
+                                                    {member_d.handicap}{"\n"}
+                                                </Text>
+                                                <Text>
+                                                    {(member_d.handicap * this.state.round.hcp_adjustment).toFixed(0)}
+                                                </Text>
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    {
+                                        member_d.front9.map(hole => {
+                                            return (
+                                                <View style={{ margin: 1, width: 25 }}>
+                                                    <Text style={{ fontSize: 8, color: 'gray', textAlign: 'center' }}>{hole.adv} </Text>
+                                                    <View style={{ borderWidth: 1, borderColor: 'back' }}>
+                                                        <Text style={{ textAlign: 'center' }}>{hole.strokes}</Text>
+                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_d.advStrokes[(hole.adv - 1)] == 0 ? null : member_b.advStrokes[(hole.adv - 1)]}</Text>
+                                                    </View>
+                                                </View>
+                                            );
+                                        })
+                                    }
+                                    <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'center' }}>
+                                        <Text style={{ fontWeight: 'bold' }}>{this.getTotalStrokes(member_d.front9, member_d.advStrokes)}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -510,6 +640,82 @@ class ScoreCardScreen extends Component {
                                         <Text style={{ fontWeight: 'bold' }}>{this.getTotalStrokes(member_b.back9, member_b.advStrokes)}</Text>
                                     </View>
                                 </View>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ width: 40 }}>
+                                        <Text>{member_c.nick_name}</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <View style={{
+                                                backgroundColor: member_c.tee.color,
+                                                width: 5,
+                                                height: 5
+                                            }}></View>
+                                            <Text style={{
+                                                fontSize: 12
+                                            }}>
+                                                <Text>
+                                                    {member_c.handicap}{"\n"}
+                                                </Text>
+                                                <Text>
+                                                    {(member_c.handicap * this.state.round.hcp_adjustment).toFixed(0)}
+                                                </Text>
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    {
+                                        member_c.front9.map(hole => {
+                                            return (
+                                                <View style={{ margin: 1, width: 25 }}>
+                                                    <Text style={{ fontSize: 8, color: 'gray', textAlign: 'center' }}>{hole.adv} </Text>
+                                                    <View style={{ borderWidth: 1, borderColor: 'back' }}>
+                                                        <Text style={{ textAlign: 'center' }}>{hole.strokes}</Text>
+                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_c.advStrokes[(hole.adv - 1)] == 0 ? null : member_b.advStrokes[(hole.adv - 1)]}</Text>
+                                                    </View>
+                                                </View>
+                                            );
+                                        })
+                                    }
+                                    <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'center' }}>
+                                        <Text style={{ fontWeight: 'bold' }}>{this.getTotalStrokes(member_c.front9, member_c.advStrokes)}</Text>
+                                    </View>
+                                </View>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ width: 40 }}>
+                                        <Text>{member_d.nick_name}</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <View style={{
+                                                backgroundColor: member_d.tee.color,
+                                                width: 5,
+                                                height: 5
+                                            }}></View>
+                                            <Text style={{
+                                                fontSize: 12
+                                            }}>
+                                                <Text>
+                                                    {member_d.handicap}{"\n"}
+                                                </Text>
+                                                <Text>
+                                                    {(member_d.handicap * this.state.round.hcp_adjustment).toFixed(0)}
+                                                </Text>
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    {
+                                        member_d.front9.map(hole => {
+                                            return (
+                                                <View style={{ margin: 1, width: 25 }}>
+                                                    <Text style={{ fontSize: 8, color: 'gray', textAlign: 'center' }}>{hole.adv} </Text>
+                                                    <View style={{ borderWidth: 1, borderColor: 'back' }}>
+                                                        <Text style={{ textAlign: 'center' }}>{hole.strokes}</Text>
+                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_d.advStrokes[(hole.adv - 1)] == 0 ? null : member_b.advStrokes[(hole.adv - 1)]}</Text>
+                                                    </View>
+                                                </View>
+                                            );
+                                        })
+                                    }
+                                    <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'center' }}>
+                                        <Text style={{ fontWeight: 'bold' }}>{this.getTotalStrokes(member_d.front9, member_d.advStrokes)}</Text>
+                                    </View>
+                                </View>
                             </View>
                         </View>
                     </View>
@@ -561,7 +767,7 @@ class ScoreCardScreen extends Component {
                         }
                     </View>
                 </View>
-            </View>
+            </ScrollView>
         );
     }
 }
