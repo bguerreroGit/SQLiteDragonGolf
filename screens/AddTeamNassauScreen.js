@@ -12,15 +12,21 @@ export default class AddSingleNassauScreen extends Component {
         this.buttons = ['Hi Hcp', 'Low Hcp', 'Each', 'Slid Hi', 'Slid Low'];
         if (props.navigation.getParam('single')) {
             let single = props.navigation.getParam('single');
+            let indexButtons = this.buttons.indexOf(single.who_gets_the_adv_strokes);
             this.state = {
                 indexMemberA: null,
                 indexMemberB: null,
                 indexMemberC: null,
                 indexMemberD: null,
+                indexButtons,
                 member_b: single.member_b,
                 member_a: single.member_a,
+                member_c: single.member_c,
+                member_d: single.member_d,
                 member_a_id: single.member_a_id.toString(),
                 member_b_id: single.member_b_id.toString(),
+                member_c_id: single.member_c_id,
+                member_d_id: single.member_d_id,
                 manually_adv: single.manually_adv,
                 front9: single.front_9.toString(),
                 match: single.match.toString(),
@@ -31,6 +37,7 @@ export default class AddSingleNassauScreen extends Component {
                 manually_adv: single.manually_override_adv.toString(),
                 manually_adv_strokes: single.manually_adv_strokes.toString(),
                 adv_strokes: single.adv_strokes.toString(),
+                who_gets_the_adv_strokes: single.who_gets_the_adv_strokes,
                 isLoading: true,
                 members: [],
             };
@@ -38,6 +45,9 @@ export default class AddSingleNassauScreen extends Component {
             this.state = {
                 indexMemberA: null,
                 indexMemberB: null,
+                indexMemberC: null,
+                indexMemberD: null,
+                indexButtons: 2,
                 member_b: '',
                 member_a: '',
                 member_c: '',
@@ -55,6 +65,7 @@ export default class AddSingleNassauScreen extends Component {
                 medal: '',
                 manually_adv: 0,
                 manually_adv_strokes: '',
+                who_gets_the_adv_strokes: 'Each',
                 adv_strokes: '0.0',
                 isLoading: true,
                 members: [],
@@ -81,11 +92,13 @@ export default class AddSingleNassauScreen extends Component {
                 let single = this.props.navigation.getParam('single');
                 let indexMemberA = data.findIndex(element => element.nick_name == single.member_a);
                 let indexMemberB = data.findIndex(element => element.nick_name == single.member_b);
+                let indexMemberC = data.findIndex(element => element.nick_name == single.member_c)
                 console.log('=======================  INDEX MEMBER A ====================');
                 console.log(indexMemberA);
                 this.setState({
                     indexMemberA,
                     indexMemberB,
+                    indexMemberC,
                     members: data,
                     isLoading: false,
                 });
@@ -102,37 +115,28 @@ export default class AddSingleNassauScreen extends Component {
                     isLoading: false,
                 };
             });
-        /* db.singleSettingsById(1).then(result => {
-            console.log('================= SINGLE NASSAU SETTINGS ==================');
-            console.log(result);
-            this.setState({
-                front9: result.front_9.toString(),
-                match: result.match.toString(),
-                back9: result.back_9.toString(),
-                carry: result.carry.toString(),
-                auto_press_every: result.automatic_presses_every.toString(),
-                medal: result.medal.toString(),
-            });
-            console.log('=================== END SINGLE NASSAU SETTINGS ============');
-        }).catch(error =>console.log(error))
-        */
     }
 
     updateIndex= (selectedIndex) => {
         this.setState({
-            indexButtons: selectedIndex
+            indexButtons: selectedIndex,
+            who_gets_the_adv_strokes: this.buttons[selectedIndex],
         });
     }
 
-    saveSingleNassau = () => {
+    saveTeamNassau = () => {
         let valueRound = this.props.navigation.dangerouslyGetParent().state.params.round;
-        const { member_a, member_b, member_a_id, member_b_id, manually_adv, front9, match, back9, carry, auto_press_every, medal, manually_adv_strokes, adv_strokes } = this.state;
+        const { member_a, member_b, member_c, member_d, member_a_id, member_b_id, member_c_id, member_d_id, manually_adv, front9, match, back9, carry, auto_press_every, medal, manually_adv_strokes, adv_strokes, who_gets_the_adv_strokes } = this.state;
         let data = {
             round_id: valueRound.id,
             member_a_id: member_a_id,
             member_b_id: member_b_id,
+            member_c_id: member_c_id,
+            member_d_id: member_d_id,
             member_a: member_a,
             member_b: member_b,
+            member_c: member_c,
+            member_d: member_d,
             automatic_press_every: auto_press_every,
             front_9: front9,
             back_9: back9,
@@ -142,18 +146,19 @@ export default class AddSingleNassauScreen extends Component {
             adv_strokes: adv_strokes,
             manually_override_adv: manually_adv,
             manually_adv_strokes: manually_adv_strokes,
+            who_gets_the_adv_strokes: who_gets_the_adv_strokes,
             id_sync: null,
             ultimate_sync: moment().format('YYYY-MM-DD HH:mm:ss'),
         }
-        console.log('==================== BET SINGLE NASSAU DATA ====================');
+        console.log('==================== BET TEAM NASSAU DATA ====================');
         console.log(data);
 
-        db.addBetSingleNassau(data).then(result => {
-            console.log('======================= ADD SINGLE NASSAU ===================');
+        db.addBetTeamNassau(data).then(result => {
+            console.log('======================= ADD TEAM NASSAU ===================');
             console.log(result);
-            console.log('======================= END ADD SINGLE NASSAU ===================');
+            console.log('======================= END ADD TEAM NASSAU ===================');
             if (result.rowsAffected > 0) {
-                this.props.navigation.goBack();
+                //this.props.navigation.goBack();
             }
         }).catch(err => console.log(err))
 
@@ -161,13 +166,17 @@ export default class AddSingleNassauScreen extends Component {
 
     updateBetSingle() {
         let single = this.props.navigation.getParam('single');
-        const { member_a, member_b, member_a_id, member_b_id, manually_adv, front9, match, back9, carry, auto_press_every, medal, manually_adv_strokes, adv_strokes } = this.state;
+        const { member_a, member_b, member_c, member_d, member_a_id, member_b_id, member_c_id, member_d_id, manually_adv, front9, match, back9, carry, auto_press_every, medal, manually_adv_strokes, adv_strokes, who_gets_the_adv_strokes } = this.state;
         let data = {
             id: single.id,
             member_a_id: member_a_id,
             member_b_id: member_b_id,
+            member_c_id: member_c_id,
+            member_d_id: member_d_id,
             member_a: member_a,
             member_b: member_b,
+            member_c: member_c,
+            member_d: member_d,
             automatic_press_every: auto_press_every,
             front_9: front9,
             back_9: back9,
@@ -177,14 +186,14 @@ export default class AddSingleNassauScreen extends Component {
             adv_strokes: adv_strokes,
             manually_override_adv: manually_adv,
             manually_adv_strokes: manually_adv_strokes,
+            who_gets_the_adv_strokes: who_gets_the_adv_strokes,
             id_sync: null,
-            ultimate_sync: moment().format('YYYY-MM-DD HH:mm:ss')
+            ultimate_sync: moment().format('YYYY-MM-DD HH:mm:ss'),
         }
-
-        db.updateBetSingleNassau(data).then(result => {
-            console.log('======================= UPDATE SINGLE NASSAU ===================');
+        db.updateBetTeamNassau(data).then(result => {
+            console.log('======================= UPDATE TEAM NASSAU ===================');
             console.log(result);
-            console.log('======================= UPDATE ADD SINGLE NASSAU ===================');
+            console.log('======================= UPDATE TEAM NASSAU ===================');
             if (result.rowsAffected > 0) {
                 this.props.navigation.goBack();
             }
@@ -370,10 +379,6 @@ export default class AddSingleNassauScreen extends Component {
                             selectedValue={this.state.indexMemberC}
                             style={{ height: 50, width: 60 }}
                             onValueChange={(itemValue, itemIndex) => {
-                                console.log('============= INDEX ================');
-                                console.log(this.state.members[itemValue]);
-                                console.log('============= END INDEX ================');
-                                let adv_strokes = this.state.members[this.state.indexMemberA].handicap - this.state.members[itemValue].handicap;
                                 db.singleSettingsById(this.state.members[itemValue].player_id).then(result => {
                                     console.log('================= SINGLE NASSAU SETTINGS ==================');
                                     console.log(result);
@@ -381,13 +386,6 @@ export default class AddSingleNassauScreen extends Component {
                                         indexMemberC: itemValue,
                                         member_c: this.state.members[itemValue].nick_name,
                                         member_c_id: this.state.members[itemValue].id,
-                                        front9: result.front_9.toString(),
-                                        match: result.match.toString(),
-                                        back9: result.back_9.toString(),
-                                        carry: result.carry.toString(),
-                                        auto_press_every: result.automatic_presses_every.toString(),
-                                        medal: result.medal.toString(),
-                                        adv_strokes: adv_strokes,
                                     });
                                     console.log('=================== END SINGLE NASSAU SETTINGS ============');
                                 }).catch(error => console.log(error))
@@ -406,27 +404,33 @@ export default class AddSingleNassauScreen extends Component {
                             selectedValue={this.state.indexMemberD}
                             style={{ height: 50, width: 60 }}
                             onValueChange={(itemValue, itemIndex) => {
-                                console.log('============= INDEX ================');
-                                console.log(this.state.members[itemValue]);
-                                console.log('============= END INDEX ================');
-                                let adv_strokes = this.state.members[this.state.indexMemberA].handicap - this.state.members[itemValue].handicap;
-                                db.singleSettingsById(this.state.members[itemValue].player_id).then(result => {
-                                    console.log('================= SINGLE NASSAU SETTINGS ==================');
-                                    console.log(result);
+                                console.log('============= DATA MEMBER A ================');
+                                console.log(this.state.members[this.state.indexMemberA].handicap);
+                                console.log('============= DATA MEMBER B ================');
+                                console.log(this.state.members[this.state.indexMemberB].handicap);
+                                console.log('============= DATA MEMBER C ================');
+                                console.log(this.state.members[this.state.indexMemberC].handicap);
+                                console.log('============= DATA MEMBER D ================');
+                                console.log(this.state.members[itemValue].handicap);
+                                let adv_strokes = this.state.members[this.state.indexMemberA].handicap - this.state.members[this.state.indexMemberC].handicap;
+                                console.log('======================= FIRS STROKES =============');
+                                console.log(adv_strokes);
+                                adv_strokes += this.state.members[this.state.indexMemberA].handicap - this.state.members[itemValue].handicap;
+                                console.log('======================= SECOND STROKES =============');
+                                console.log(adv_strokes);
+                                adv_strokes += this.state.members[this.state.indexMemberB].handicap - this.state.members[this.state.indexMemberC].handicap;
+                                console.log('======================= THIRD STROKES =============');
+                                adv_strokes += this.state.members[this.state.indexMemberB].handicap - this.state.members[itemValue].handicap;
+                                console.log('======================= FOUR STROKES =============');
+                                console.log(adv_strokes);
+                                adv_strokes= adv_strokes/2
                                     this.setState({
                                         indexMemberD: itemValue,
                                         member_d: this.state.members[itemValue].nick_name,
                                         member_d_id: this.state.members[itemValue].id,
-                                        front9: result.front_9.toString(),
-                                        match: result.match.toString(),
-                                        back9: result.back_9.toString(),
-                                        carry: result.carry.toString(),
-                                        auto_press_every: result.automatic_presses_every.toString(),
-                                        medal: result.medal.toString(),
-                                        adv_strokes: adv_strokes,
+                                        adv_strokes: adv_strokes.toFixed(0),
                                     });
                                     console.log('=================== END SINGLE NASSAU SETTINGS ============');
-                                }).catch(error => console.log(error))
                             }}>
                             <Picker label={'----'} value={null} />
                             {
@@ -447,7 +451,7 @@ export default class AddSingleNassauScreen extends Component {
                         if (this.props.navigation.getParam('single')) {
                             this.updateBetSingle();
                         } else {
-                            this.saveSingleNassau();
+                            this.saveTeamNassau();
                         }
                     }}
                 />

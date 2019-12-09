@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, Text, ScrollView } from 'react-native';
 import { ListItem, Button } from 'react-native-elements';
 import Database from '../Database';
 import SingleBetComponet from '../components/SingleBetComponet';
+import TeamBetComponent from '../components/TeamBetComponet';
+
 const db = new Database();
 
 class BetsHomeScreen extends Component {
@@ -10,7 +12,8 @@ class BetsHomeScreen extends Component {
         super(props);
         this.state = {
             isLoading: true,
-            betsSingleNassau: []
+            betsSingleNassau: [],
+            betsTeamNassau: [],
         };
     }
 
@@ -28,9 +31,16 @@ class BetsHomeScreen extends Component {
         db.listBetsSingleNassau(valueRound.id).then(result => {
             this.setState({
                 betsSingleNassau: result,
-                isLoading: false
             });
         }).catch(err => console.log(err));
+        db.listBetsTeamNassau(valueRound.id).then( result => {
+            console.log('==================== LISTA BETS TEAM NASSAU ==================');
+            console.log(result);
+            this.setState({
+                betsTeamNassau: result,
+                isLoading: false
+            });
+        });
     }
 
     getNickNameOfMember= async (id) =>{
@@ -41,7 +51,7 @@ class BetsHomeScreen extends Component {
     }
     render() {
         return (
-            <View style={styles.container}>
+            <ScrollView style={styles.container}>
                 <View>
                     <ListItem
                         title={'Nassau Individual'}
@@ -122,9 +132,9 @@ class BetsHomeScreen extends Component {
                     {
                         this.state.isLoading == false ?
                             <FlatList
-                                data={this.state.betsSingleNassau}
+                                data={this.state.betsTeamNassau}
                                 renderItem={({ item, index }) => (
-                                    <SingleBetComponet
+                                    <TeamBetComponent
                                         bet={item}
                                         index={index}
                                         navigation={this.props.navigation}
@@ -134,9 +144,8 @@ class BetsHomeScreen extends Component {
                                 keyExtractor={item => item.id}
                             /> : null
                     }
-
                 </View>
-            </View>
+            </ScrollView>
         );
     }
 }

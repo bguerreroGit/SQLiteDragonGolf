@@ -71,6 +71,7 @@ import ScoreCardScreen from './screens/ScoreCardScreen';
 import AddSingleNassauScreen from './screens/AddSingleNassauScreen';
 import SingleNassauScoreCard from './screens/SingleNassauScoreCard';
 import AddTeamNassauScreen from './screens/AddTeamNassauScreen';
+import TeamNassauScoreCard from './screens/TeamNassauScoreCard';
 
 const RoundPlayersStack = createStackNavigator(
   {
@@ -143,6 +144,9 @@ const BetsStack = createStackNavigator(
     },
     SingleNassauScoreCard: {
       screen: SingleNassauScoreCard
+    },
+    TeamNassauScoreCard: {
+      screen: TeamNassauScoreCard
     }
   },
   {

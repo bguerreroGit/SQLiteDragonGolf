@@ -183,8 +183,9 @@ export default class Database {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
                     tx.executeSql('SELECT * FROM bets_team_nassau WHERE round_id= ?', [round_id]).then(([tx, results]) => {
-                        console.log("Query completed");
                         var len = results.rows.length;
+                        console.log("=================== BETS SINGLE NASSAU =======================");
+                        console.log(results);
                         for (let i = 0; i < len; i++) {
                             let row = results.rows.item(i);
                             betsTeamNassau.push(row);
@@ -2256,7 +2257,7 @@ export default class Database {
         return new Promise((resolve) => {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
-                    tx.executeSql('INSERT INTO round_members(player_id, nick_name, photo, tee_id, round_id, handicap, id_sync, ultimate_sync) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [member.player_id, member.nick_name, member.photo, member.tee_id, member.round_id, member.handicap, member.id_sync, member.ultimate_sync]).then(([tx, results]) => {
+                    tx.executeSql('INSERT INTO round_members(player_id, nick_name, photo, tee_id, round_id, handicap, id_sync, ultimate_sync) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)', [member.player_id, member.nick_name, member.photo, member.tee_id, member.round_id, member.handicap, member.id_sync, member.ultimate_sync]).then(([tx, results]) => {
                         resolve(results);
                     });
                 }).then((result) => {
@@ -2466,6 +2467,24 @@ export default class Database {
             this.initDB().then((db) => {
                 db.transaction((tx) => {
                     tx.executeSql('UPDATE bets_single_nassau SET member_a_id= ?, member_b_id= ?, member_a= ?, member_b= ?, automatic_press_every = ?, front_9= ?, back_9= ?, match= ?, carry= ?, medal= ?, adv_strokes= ?, manually_override_adv= ?, manually_adv_strokes= ?, id_sync= ?, ultimate_sync= ? WHERE id = ?', [single.member_a_id, single.member_b_id, single.member_a, single.member_b, single.automatic_press_every, single.front_9, single.back_9, single.match, single.carry, single.medal, single.adv_strokes, single.manually_override_adv, single.manually_adv_strokes, single.id_sync, single.ultimate_sync, single.id]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    updateBetTeamNassau(team) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('UPDATE bets_team_nassau SET member_a_id= ?, member_b_id= ?, member_c_id= ?, member_d_id= ?, member_a= ?, member_b= ?, member_c= ?, member_d= ?, automatic_press_every= ?, front_9= ?, back_9= ?, match= ?, carry= ?, medal= ?, adv_strokes= ?, manually_override_adv= ?, manually_adv_strokes= ?, who_gets_the_adv_strokes= ?, id_sync= ?, ultimate_sync= ? WHERE id= ?', [team.member_a_id, team.member_b_id, team.member_c_id, team.member_d_id, team.member_a, team.member_b, team.member_c, team.member_d, team.automatic_press_every, team.front_9, team.back_9, team.match, team.carry, team.medal, team.adv_strokes, team.manually_override_adv, team.manually_adv_strokes, team.who_gets_the_adv_strokes, team.id_sync, team.ultimate_sync, team.id]).then(([tx, results]) => {
                         resolve(results);
                     });
                 }).then((result) => {
