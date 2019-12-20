@@ -54,6 +54,34 @@ class BetsHomeScreen extends Component {
             <ScrollView style={styles.container}>
                 <View>
                     <ListItem
+                        title={'Rabbit Bets'}
+                        bottomDivider
+                        rightElement={<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <Button
+                                title='clean'
+                                buttonStyle={{
+                                    backgroundColor: '#694fad',
+                                    marginRight: 5
+                                }}
+                            />
+                            <Button
+                                title='add'
+                                buttonStyle={{
+                                    backgroundColor: '#694fad'
+                                }}
+                                onPress={() => this.props.navigation.navigate('AddRabbitBet')}
+                            />
+
+                        </View>}
+                        chevron
+                    />
+                    {
+                        this.state.isLoading == false ?
+                            <Text>Contenido</Text> : null
+                    }
+                </View>
+                <View>
+                    <ListItem
                         title={'Nassau Individual'}
                         bottomDivider
                         rightElement={<View style={{flexDirection: 'row', justifyContent: 'space-between'}}>

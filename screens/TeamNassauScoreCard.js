@@ -51,35 +51,175 @@ class ScoreCardScreen extends Component {
         member_c.advStrokes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         member_d = member_d[0];
         member_d.advStrokes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        console.log('======================== MEMBER A =====================');
-        console.log(member_a);
-        console.log('======================== END MEMBER A =================');
-        console.log('======================== MEMBER B =====================');
-        console.log(member_b);
-        console.log('======================== END MEMBER B =================');
-        let strokes = 0;
-        if (single.manually_override_adv == 1) {
-            if (single.manually_adv_strokes > 0) {
-                console.log('================= MANUAL Recibe golpes MEMBER A===================');
-                strokes = single.manually_adv_strokes;
-                member_a.advStrokes = this.distributeAdv(strokes);
-            } else {
-                console.log('================= MANUAL Recibe golpes MEMBER B===================');
-                console.log(single.manually_adv_strokes * -1);
-                strokes = single.manually_adv_strokes * -1;
-                member_b.advStrokes = this.distributeAdv(strokes);
-            }
-        } else {
-            if (single.adv_strokes > 0) {
-                console.log('================= Recibe golpes MEMBER A===================');
-                strokes = single.adv_strokes;
-                member_a.advStrokes = this.distributeAdv(strokes);
-            } else {
-                console.log('================= Recibe golpes MEMBER B===================');
-                console.log(single.adv_strokes * -1);
-                strokes = single.adv_strokes * -1;
-                member_b.advStrokes = this.distributeAdv(strokes);
-            }
+        let advStrokesOfPlayers = [0, 0, 0, 0];
+        advStrokesOfPlayers[0] = (member_a.handicap - member_c.handicap) + (member_a.handicap - member_d.handicap);
+        advStrokesOfPlayers[1] = (member_b.handicap - member_c.handicap) + (member_b.handicap - member_d.handicap);
+        advStrokesOfPlayers[2] = (member_c.handicap - member_a.handicap) + (member_c.handicap - member_b.handicap);
+        advStrokesOfPlayers[3] = (member_d.handicap - member_a.handicap) + (member_d.handicap - member_b.handicap);
+        let promTeam_1 = (member_a.handicap + member_b.handicap) / 2;
+        let promTeam_2 = (member_c.handicap + member_d.handicap) / 2;
+        let strokes = (advStrokesOfPlayers[0] + advStrokesOfPlayers[1]) / 2;
+        switch (single.who_gets_the_adv_strokes) {
+            case 'Hi Hcp':
+                console.log('======================== TEAM NASSAU HI HCP =====================');
+                console.log(advStrokesOfPlayers);
+                let maximo = Math.max(...advStrokesOfPlayers);
+                console.log('Maximo: ', maximo);
+                let maxIndex = advStrokesOfPlayers.indexOf(maximo);
+                console.log('Maximo index: ', maxIndex);
+                console.log('======================== END TEAM NASSAU HI HCP =================');
+                if (maxIndex == 0) {
+                    if (single.manually_override_adv == 1) {
+                        strokes = Math.abs(single.manually_adv_strokes);
+                    } else {
+                        strokes = Math.abs(single.adv_strokes);
+                    }
+                    member_a.advStrokes = this.distributeAdv(strokes);
+                }
+                if (maxIndex == 1) {
+                    if (single.manually_override_adv == 1) {
+                        strokes = Math.abs(single.manually_adv_strokes);
+                    } else {
+                        strokes = Math.abs(single.adv_strokes);
+                    }
+                    member_b.advStrokes = this.distributeAdv(strokes);
+                }
+                if (maxIndex == 2) {
+                    if (single.manually_override_adv == 1) {
+                        strokes = Math.abs(single.manually_adv_strokes);
+                    } else {
+                        strokes = Math.abs(single.adv_strokes);
+                    }
+                    member_c.advStrokes = this.distributeAdv(strokes);
+                }
+                if (maxIndex == 3) {
+                    if (single.manually_override_adv == 1) {
+                        strokes = Math.abs(single.manually_adv_strokes);
+                    } else {
+                        strokes = Math.abs(single.adv_strokes);
+                    }
+                    member_d.advStrokes = this.distributeAdv(strokes);
+                }
+                break;
+            case 'Low Hcp':
+                console.log('======================== TEAM NASSAU LOW HCP =====================');
+                console.log(advStrokesOfPlayers);
+                let minimo = Math.min(...advStrokesOfPlayers);
+                console.log('Minimo: ', minimo);
+                let minIndex = advStrokesOfPlayers.indexOf(minimo);
+                console.log('Minimo index: ', minIndex);
+                console.log('======================== END TEAM NASSAU LOW HCP =================');
+                if (minIndex == 0) {
+                    if (single.manually_override_adv == 1) {
+                        strokes = Math.abs(single.manually_adv_strokes);
+                    } else {
+                        strokes = Math.abs(single.adv_strokes);
+                    }
+                    member_a.advStrokes = this.distributeAdv(strokes);
+                }
+                if (minIndex == 1) {
+                    if (single.manually_override_adv == 1) {
+                        strokes = Math.abs(single.manually_adv_strokes);
+                    } else {
+                        strokes = Math.abs(single.adv_strokes);
+                    }
+                    member_b.advStrokes = this.distributeAdv(strokes);
+                }
+                if (minIndex == 2) {
+                    if (single.manually_override_adv == 1) {
+                        strokes = Math.abs(single.manually_adv_strokes);
+                    } else {
+                        strokes = Math.abs(single.adv_strokes);
+                    }
+                    member_c.advStrokes = this.distributeAdv(strokes);
+                }
+                if (minIndex == 3) {
+                    if (single.manually_override_adv == 1) {
+                        strokes = Math.abs(single.manually_adv_strokes);
+                    } else {
+                        strokes = Math.abs(single.adv_strokes);
+                    }
+                    member_d.advStrokes = this.distributeAdv(strokes);
+                }
+                break;
+            case 'Each':
+                if(member_a.handicap<=member_b.handicap){
+                    if(member_c.handicap<=member_d.handicap){
+                        strokes= member_a.handicap - member_c.handicap
+                        if(strokes>0){
+                            member_a.advStrokes = this.distributeAdv(strokes);
+                        }else{
+                            member_c.advStrokes = this.distributeAdv(strokes);
+                        }
+                    }else {
+                        strokes = member_a.handicap - member_d.handicap 
+                        if (strokes > 0) {
+                            member_a.advStrokes = this.distributeAdv(strokes);
+                        } else {
+                            member_d.advStrokes = this.distributeAdv(strokes);
+                        }
+                    }
+                }else{
+                    if (member_c.handicap <= member_d.handicap) {
+                        strokes = member_b.handicap - member_c.handicap
+                        if (strokes > 0) {
+                            member_b.advStrokes = this.distributeAdv(strokes);
+                        } else {
+                            member_c.advStrokes = this.distributeAdv(strokes);
+                        }
+                    } else {
+                        strokes = member_b.handicap - member_d.handicap
+                        if (strokes > 0) {
+                            member_b.advStrokes = this.distributeAdv(strokes);
+                        } else {
+                            member_d.advStrokes = this.distributeAdv(strokes);
+                        }
+                    }
+                }
+                
+                break;
+            case 'Slid Hi':
+                if (single.manually_override_adv == 1) {
+                    strokes = Math.abs(single.manually_adv_strokes);
+                } else {
+                    strokes = Math.abs(single.adv_strokes);
+                }
+                if (promTeam_1 >= promTeam_2) {
+                    if (member_a.handicap >= member_b.handicap) {
+                        member_a.advStrokes = this.distributeAdv(strokes);
+                    } else {
+                        member_b.advStrokes = this.distributeAdv(strokes);
+                    }
+                } else {
+                    if (member_c.handicap >= member_d.handicap) {
+                        member_c.advStrokes = this.distributeAdv(strokes);
+                    } else {
+                        member_d.advStrokes = this.distributeAdv(strokes);
+                    }
+                }
+                break;
+            case 'Slid Low':
+                if (single.manually_override_adv == 1) {
+                    strokes = Math.abs(single.manually_adv_strokes);
+                } else {
+                    strokes = Math.abs(single.adv_strokes);
+                }
+                if (promTeam_1 <= promTeam_2) {
+                    if (member_a.handicap <= member_b.handicap) {
+                        member_a.advStrokes = this.distributeAdv(strokes);
+                    } else {
+                        member_b.advStrokes = this.distributeAdv(strokes);
+                    }
+                } else {
+                    if (member_c.handicap <= member_d.handicap) {
+                        member_c.advStrokes = this.distributeAdv(strokes);
+                    } else {
+                        member_d.advStrokes = this.distributeAdv(strokes);
+                    }
+                }
+                break;
+            default:
+                break;
         }
         if (round.adv_b9_f9 == 1 && round.starting_hole > 1) {
             member_a.holes = this.swichAdvantage(member_a.holes);
@@ -100,15 +240,16 @@ class ScoreCardScreen extends Component {
         member_c.back9 = cFront9AndBack9.back9;
         member_d.back9 = dFront9AndBack9.back9;
         let front9Presses = this.calculePresses(member_a.front9, member_a.advStrokes, member_b.front9, member_b.advStrokes, member_c.front9, member_c.advStrokes, member_d.front9, member_d.advStrokes, single);
-        //let back9Presses = this.calculePresses(member_a.back9, member_a.advStrokes, member_b.back9, member_b.advStrokes);
+        let back9Presses = this.calculePresses(member_a.back9, member_a.advStrokes, member_b.back9, member_b.advStrokes, member_c.back9, member_c.advStrokes, member_d.back9, member_d.advStrokes, single);
+        
         this.setState({
             member_a: member_a,
             member_b: member_b,
             member_c: member_c,
             member_d: member_d,
             round: round,
-            front9Presses: [],
-            back9Presses: [],
+            front9Presses,
+            back9Presses,
             isLoading: false
         });
     }
@@ -180,12 +321,13 @@ class ScoreCardScreen extends Component {
         let strokes_c=0;
         let strokes_d=0;
         let advIndex = 0;
-        let auxPressesArray = [];
+        let auxPressesArray = [
+            [null, null, null, null, null, null, null, null, null],
+        ];
+        let isOpenPress= false;
         let indexPress = 0;
         for (let index = 0; index < 9; index++) {
-            if (back9_a[index].strokes == null) {
-                
-            } else {
+            if (back9_a[index].strokes != null) {
                 if (anterior == null) {
                     anterior = index
                 }
@@ -203,16 +345,15 @@ class ScoreCardScreen extends Component {
                 strokes_c = back9_c[index].strokes - advantage_c[advIndex];
                 console.log('=================== STROKES JUGADOR C ===============');
                 console.log(' -Golpes total: ' + strokes_c);
-                /*
                 advIndex = back9_d[index].adv - 1;
                 strokes_d = back9_d[index].strokes - advantage_d[advIndex];
                 console.log('=================== STROKES JUGADOR D ===============');
                 console.log(' -Golpes total: ' + strokes_d);
-                */
                 let minTeamOne= null;
                 let minTeamTwo= null;
                 let maxTeamOne= null;
                 let maxTeamTwo= null;
+                let auxAntValor=null;
                 //Mayor y menor de los equipos
                 if(strokes_a<=strokes_b){
                     minTeamOne=strokes_a;
@@ -229,72 +370,83 @@ class ScoreCardScreen extends Component {
                     maxTeamTwo = strokes_c;
                 }
 
-                if (auxPressesArray.length == 0) {
-                    auxPressesArray.push(back9Presses);
                     if (minTeamOne < minTeamTwo) {
-                        auxPressesArray[0][index] = 1;
+                        for (let j = 0; j <= indexPress; j++) {
+                            auxPressesArray[j][index] = auxPressesArray[j][anterior] + 1;
+                            console.log('Gana min team 1 Valor:  ' + auxPressesArray[j][anterior] + ' nuevo valor: ' + auxPressesArray[j][index]);
+                        }
                     } else if (minTeamTwo < minTeamOne) {
-                        auxPressesArray[0][index] = -1;
+                        for (let j = 0; j <= indexPress; j++) {
+                            auxPressesArray[j][index] = auxPressesArray[j][anterior] - 1;
+                            console.log('pierde min team 1 Valor:  ' + auxPressesArray[j][anterior] + ' nuevo valor: ' + auxPressesArray[j][index]);
+                        }
                     } else {
-                        auxPressesArray[0][index] = 0;
+                        for (let j = 0; j <= indexPress; j++) {
+                            auxPressesArray[j][index] = auxPressesArray[j][anterior] ;
+                            console.log('Empatan min Valor:  ' + auxPressesArray[j][anterior] + ' nuevo valor: ' + auxPressesArray[j][index]);
+                        }
                     }
 
-                    if (auxPressesArray[indexPress][index] > 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
+                    if (auxPressesArray[indexPress][index] != 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
                         console.log('========================== Se abre presion ========================');
                         indexPress += 1;
+                        isOpenPress=true;
                         back9Presses[index] = 0;
                         auxPressesArray.push(back9Presses);
                     }
 
                     if (maxTeamOne < maxTeamTwo) {
-                        auxPressesArray[0][index] += 1;
+                        if(isOpenPress==true){
+                            for (let j = 0; j <= indexPress - 1; j++) {
+                                auxAntValor = auxPressesArray[j][index];
+                                auxPressesArray[j][index] = auxPressesArray[j][index] + 1;
+                                console.log('SUMA 1 Gana max team 1 Valor:  ' + auxAntValor + ' nuevo valor: ' + auxPressesArray[j][index]);
+                            }
+                        }else {
+                            for (let j = 0; j <= indexPress; j++) {
+                                auxPressesArray[j][index] = auxPressesArray[j][index] + 1;
+                                console.log('Gana max team 1 Valor:  ' + auxPressesArray[j][index] + ' nuevo valor: ' + auxPressesArray[j][index]);
+                            }
+                        }
                     } else if (maxTeamTwo < maxTeamOne) {
-                        auxPressesArray[0][index] -= 1;
+                        if (isOpenPress == true) {
+                            for (let j = 0; j <= indexPress - 1; j++) {
+                                auxAntValor = auxPressesArray[j][index];
+                                auxPressesArray[j][index] = auxPressesArray[j][index] - 1;
+                                console.log(' Resta 1 pierde max team 1 Valor:  ' + auxAntValor + ' nuevo valor: ' + auxPressesArray[j][index]);
+                                
+                            }
+                        } else {
+                            for (let j = 0; j <= indexPress; j++) {
+                                auxAntValor = auxPressesArray[j][index];
+                                auxPressesArray[j][index] = auxPressesArray[j][index] - 1;
+                                console.log(' Resta 1 pierde max team 1 Valor:  ' + auxAntValor + ' nuevo valor: ' + auxPressesArray[j][index]);
+                            }
+                        }
                     } else {
-                        auxPressesArray[0][index] = 0;
+                        if (isOpenPress == true) {
+                            for (let j = 0; j <= indexPress - 1; j++) {
+                                auxPressesArray[j][index] = auxPressesArray[j][index];
+                                console.log('Empatan max Valor:  ' + auxPressesArray[j][index] + ' nuevo valor: ' + auxPressesArray[j][index]);
+                            }
+                        } else {
+                            for (let j = 0; j <= indexPress; j++) {
+                                auxPressesArray[j][index] = auxPressesArray[j][index];
+                                console.log('Empatan max Valor:  ' + auxPressesArray[j][index] + ' nuevo valor: ' + auxPressesArray[j][index]);
+                            }
+                        }
                     }
-                    if (auxPressesArray[indexPress][index] > 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
+                    console.log('Valor del ultimo press: ' + auxPressesArray[indexPress][index]);
+                    if (isOpenPress == false  && auxPressesArray[indexPress][index] != 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
                         console.log('========================== Se abre presion ========================');
                         indexPress += 1;
                         back9Presses[index] = 0;
                         auxPressesArray.push(back9Presses);
                     }
-                    console.log('================= PRESIONES ABIERTAS ====================');
-                    console.log(auxPressesArray);
-                } else {
-                    if (strokes_a < strokes_b) {
-                        for (let j = 0; j <= indexPress; j++) {
-                            auxPressesArray[j][index] = (auxPressesArray[j][anterior] + 1);
-                            console.log('Valor:  ' + auxPressesArray[j][anterior] + ' nuevo valor: ' + auxPressesArray[j][index]);
-                        }
-
-                        if (auxPressesArray[indexPress][index] > 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
-                            console.log('========================== Se abre presion ========================');
-                            indexPress += 1;
-                            back9Presses[index] = 0;
-                            auxPressesArray.push(back9Presses);
-                        }
-
-                    } else if (strokes_b < strokes_a) {
-                        for (let j = 0; j <= indexPress; j++) {
-                            auxPressesArray[j][index] = (auxPressesArray[j][anterior] - 1);
-                            console.log('Valor:  ' + auxPressesArray[j][anterior] + ' nuevo valor: ' + auxPressesArray[j][index]);
-                        }
-                        if (auxPressesArray[indexPress][index] < 0 && (auxPressesArray[indexPress][index]) % single.automatic_press_every == 0) {
-                            console.log('=================== Se abre presion negativa =================');
-                            indexPress += 1;
-                            back9Presses[index] = 0;
-                            auxPressesArray.push(back9Presses);
-                        }
-                    } else {
-                        console.log('======================== SE EMPATAN =========================');
-                        for (let j = 0; j <= indexPress; j++) {
-                            auxPressesArray[j][index] = auxPressesArray[j][anterior];
-                            console.log('Valor:  ' + auxPressesArray[j][anterior] + ' nuevo valor: ' + auxPressesArray[j][index]);
-                        }
-                    }
-                }
+                console.log('================= PRESIONES ABIERTAS HOYO: ' + back9_b[index].hole_number + ' ====================');
+                console.log(auxPressesArray);
                 anterior = index;
+                isOpenPress= false;
             }
 
         }
@@ -501,7 +653,7 @@ class ScoreCardScreen extends Component {
                                                     <Text style={{ fontSize: 8, color: 'gray', textAlign: 'center' }}>{hole.adv} </Text>
                                                     <View style={{ borderWidth: 1, borderColor: 'back' }}>
                                                         <Text style={{ textAlign: 'center' }}>{hole.strokes}</Text>
-                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_d.advStrokes[(hole.adv - 1)] == 0 ? null : member_b.advStrokes[(hole.adv - 1)]}</Text>
+                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_d.advStrokes[(hole.adv - 1)] == 0 ? null : member_d.advStrokes[(hole.adv - 1)]}</Text>
                                                     </View>
                                                 </View>
                                             );
@@ -525,27 +677,21 @@ class ScoreCardScreen extends Component {
                             member_a.front9.map((hole, index) => {
                                 let auxLastIndex = 0;
                                 return (
-                                    <View style={{ borderWidth: 1, borderColor: 'back', width: 25, height: 80, margin: 1 }}>
+                                    <View style={{ borderWidth: 1, borderColor: 'back', width: 25, height: 100, margin: 1 }}>
                                         {
-                                            front9Presses.map((press) => {
-                                                if (press[index] == null) {
-                                                    return null;
-                                                }
-                                                if (press[index] == 0) {
-                                                    if (press[index - 1] == null) {
-                                                        auxLastIndex = 0;
-                                                        auxLastIndex = press.slice(0, index).reverse().findIndex(element => element != null);
-                                                        if (auxLastIndex != -1) {
-                                                            return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
-                                                        } else
-                                                            return null;
-                                                    } else {
-                                                        return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
+                                            front9Presses.map((press, j) => {
+                                                    let indexOfCero = null;
+                                                    if (press[index] == null) {
+                                                        return null;
                                                     }
-                                                    if (press[index - 1] == 0) {
-                                                        return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
-                                                    }
-                                                }
+                                                    if (press[index] == 0) {
+                                                        indexOfCero = press.indexOf(0);
+                                                        if (j > 0 && indexOfCero == index) {
+                                                            return null
+                                                        } else {
+                                                            return (<Text style={{ fontSize: 8, textAlign: 'center' }}> = </Text>)
+                                                        }
+                                                    }    
                                                 else if (press[index] < 0) {
                                                     return (<Text style={{ fontSize: 8, textAlign: 'center', color: 'red' }}>{press[index]}</Text>)
                                                 } else {
@@ -599,7 +745,7 @@ class ScoreCardScreen extends Component {
                                                     <Text style={{ fontSize: 8, color: 'gray', textAlign: 'center' }}>{hole.adv} </Text>
                                                     <View style={{ borderWidth: 1, borderColor: 'back' }}>
                                                         <Text style={{ textAlign: 'center' }}>{hole.strokes}</Text>
-                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_a.advStrokes[(hole.adv - 1)]}</Text>
+                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_a.advStrokes[(hole.adv - 1)] == 0 ? null : member_a.advStrokes[(hole.adv - 1)]}</Text>
                                                     </View>
                                                 </View>
                                             );
@@ -630,7 +776,7 @@ class ScoreCardScreen extends Component {
                                                     <Text style={{ fontSize: 8, color: 'gray', textAlign: 'center' }}>{hole.adv} </Text>
                                                     <View style={{ borderWidth: 1, borderColor: 'back' }}>
                                                         <Text style={{ textAlign: 'center' }}>{hole.strokes}</Text>
-                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_b.advStrokes[(hole.adv - 1)]}</Text>
+                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_b.advStrokes[(hole.adv - 1)] == 0 ? null : member_b.advStrokes[(hole.adv - 1)]}</Text>
                                                     </View>
                                                 </View>
                                             );
@@ -662,7 +808,7 @@ class ScoreCardScreen extends Component {
                                         </View>
                                     </View>
                                     {
-                                        member_c.front9.map(hole => {
+                                        member_c.back9.map(hole => {
                                             return (
                                                 <View style={{ margin: 1, width: 25 }}>
                                                     <Text style={{ fontSize: 8, color: 'gray', textAlign: 'center' }}>{hole.adv} </Text>
@@ -675,7 +821,7 @@ class ScoreCardScreen extends Component {
                                         })
                                     }
                                     <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'center' }}>
-                                        <Text style={{ fontWeight: 'bold' }}>{this.getTotalStrokes(member_c.front9, member_c.advStrokes)}</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>{this.getTotalStrokes(member_c.back9, member_c.advStrokes)}</Text>
                                     </View>
                                 </View>
                                 <View style={{ flexDirection: 'row' }}>
@@ -700,20 +846,20 @@ class ScoreCardScreen extends Component {
                                         </View>
                                     </View>
                                     {
-                                        member_d.front9.map(hole => {
+                                        member_d.back9.map(hole => {
                                             return (
                                                 <View style={{ margin: 1, width: 25 }}>
                                                     <Text style={{ fontSize: 8, color: 'gray', textAlign: 'center' }}>{hole.adv} </Text>
                                                     <View style={{ borderWidth: 1, borderColor: 'back' }}>
                                                         <Text style={{ textAlign: 'center' }}>{hole.strokes}</Text>
-                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_d.advStrokes[(hole.adv - 1)] == 0 ? null : member_b.advStrokes[(hole.adv - 1)]}</Text>
+                                                        <Text style={{ fontSize: 8, color: 'red', textAlign: 'right' }}>{member_d.advStrokes[(hole.adv - 1)] == 0 ? null : member_d.advStrokes[(hole.adv - 1)]}</Text>
                                                     </View>
                                                 </View>
                                             );
                                         })
                                     }
                                     <View style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'center' }}>
-                                        <Text style={{ fontWeight: 'bold' }}>{this.getTotalStrokes(member_d.front9, member_d.advStrokes)}</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>{this.getTotalStrokes(member_d.back9, member_d.advStrokes)}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -730,27 +876,19 @@ class ScoreCardScreen extends Component {
                             member_a.front9.map((hole, index) => {
                                 let auxLastIndex = 0;
                                 return (
-                                    <View style={{ borderWidth: 1, borderColor: 'back', width: 25, height: 80, margin: 1 }}>
+                                    <View style={{ borderWidth: 1, borderColor: 'back', width: 25, height: 100, margin: 1 }}>
                                         {
-                                            back9Presses.map((press) => {
+                                            back9Presses.map((press, j) => {
+                                                let indexOfCero=null;
                                                 if (press[index] == null) {
                                                     return null;
                                                 }
                                                 if (press[index] == 0) {
-                                                    if (press[index - 1] == null) {
-                                                        auxLastIndex = 0;
-                                                        console.log('====================== Index direrente de nulo =================');
-                                                        console.log(press.slice(0, index));
-                                                        console.log(press.slice(0, index).reverse());
-                                                        console.log(press.slice(0, index).reverse().findIndex(element => element != null));
-                                                        auxLastIndex = press.slice(0, index).reverse().findIndex(element => element != null);
-                                                        if (auxLastIndex != -1) {
-                                                            return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
-                                                        } else
-                                                            return null;
-                                                    }
-                                                    if (press[index - 1] == 0) {
-                                                        return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
+                                                    indexOfCero=press.indexOf(0);
+                                                    if(j>0 && indexOfCero==index){
+                                                        return null
+                                                    }else {
+                                                        return (<Text style={{ fontSize: 8, textAlign: 'center' }}> = </Text>)
                                                     }
                                                 }
                                                 else if (press[index] < 0) {

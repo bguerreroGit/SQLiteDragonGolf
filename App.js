@@ -72,6 +72,7 @@ import AddSingleNassauScreen from './screens/AddSingleNassauScreen';
 import SingleNassauScoreCard from './screens/SingleNassauScoreCard';
 import AddTeamNassauScreen from './screens/AddTeamNassauScreen';
 import TeamNassauScoreCard from './screens/TeamNassauScoreCard';
+import AddRabbitBetScreen from './screens/AddRabbitBetScreen';
 
 const RoundPlayersStack = createStackNavigator(
   {
@@ -128,6 +129,12 @@ const BetsStack = createStackNavigator(
       screen: BetsHomeScreen,
       navigationOptions: {
         title: 'Bets'
+      }
+    },
+    AddRabbitBet: {
+      screen: AddRabbitBetScreen,
+      navigationOptions: {
+        title: 'Add Rabbit Bet'
       }
     },
     AddTeamNassau: {

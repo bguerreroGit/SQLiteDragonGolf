@@ -42,6 +42,8 @@ export default class Database {
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS bets_single_nassau(id INTEGER PRIMARY KEY AUTOINCREMENT, round_id INTEGER, member_a_id INTEGER, member_b_id INTEGER, member_a VARCHAR(10), member_b VARCHAR(10), automatic_press_every INTEGER, front_9 FLOAT, back_9 FLOAT, match FLOAT, carry FLOAT, medal FLOAT, adv_strokes FLOAT, manually_override_adv TINYINT, manually_adv_strokes FLOAT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS bets_team_nassau(id INTEGER PRIMARY KEY AUTOINCREMENT, round_id INTEGER, member_a_id INTEGER, member_b_id INTEGER, member_c_id INTEGER, member_d_id INTEGER, member_a VARCHAR(10), member_b VARCHAR(10), member_c VARCHAR(10), member_d VARCHAR(10), automatic_press_every INTEGER, front_9 FLOAT, back_9 FLOAT, match FLOAT, carry FLOAT, medal FLOAT, adv_strokes FLOAT, manually_override_adv TINYINT, manually_adv_strokes FLOAT, who_gets_the_adv_strokes VARCHAR(20), id_sync INTEGER, ultimate_sync TIMESTAMP)');
                                 tx.executeSql('CREATE TABLE IF NOT EXISTS players_confrontation(member_a_id INTEGER, member_b_id INTEGER, adv_strokes FLOAT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS bets_rabbit(id INTEGER PRIMARY KEY AUTOINCREMENT, round_id INTEGER, option VARCHAR(20), price_r1 FLOAT, price_r2 FLOAT, price_r3 FLOAT, id_sync INTEGER, ultimate_sync TIMESTAMP)');
+                                tx.executeSql('CREATE TABLE IF NOT EXISTS rabbit_players(bet_rabbit_id INTEGER, member_id INTEGER, id_sync INTEGER, ultimate_sync TIMESTAMP)');
                             }).then(() => {
                                 resolve(db);
                                 //console.log("Table created successfully");
@@ -139,6 +141,56 @@ export default class Database {
                         }
                         console.log(rounds);
                         resolve(rounds);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    listBetsRabbit(round_id) {
+        return new Promise((resolve) => {
+            const rabbitBets = [];
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT * FROM bets_rabbit WHERE round_id= ?', [round_id]).then(([tx, results]) => {
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            rabbitBets.push(row);
+                        }
+                        resolve(rabbitBets);
+                    });
+                }).then((result) => {
+                    //this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    listBetsSingleNassau(round_id) {
+        return new Promise((resolve) => {
+            const betsSingleNassau = [];
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('SELECT * FROM bets_single_nassau WHERE round_id= ?', [round_id]).then(([tx, results]) => {
+                        console.log("Query completed");
+                        var len = results.rows.length;
+                        for (let i = 0; i < len; i++) {
+                            let row = results.rows.item(i);
+                            //const { adv_strokes, automatic_press_every, back_9, carry, front_9, id, id_sync, manually_adv_strokes, manually_override_adv, match, medal, memberA , memberB, round_id, ultimate_sync } = row;
+                            betsSingleNassau.push(row);
+                        }
+                        resolve(betsSingleNassau);
                     });
                 }).then((result) => {
                     //this.closeDatabase(db);
@@ -2453,6 +2505,43 @@ export default class Database {
                     });
                 }).then((result) => {
                     // this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    addBetRabbit(rabbit) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    tx.executeSql('INSERT INTO bets_rabbit (round_id, option, price_r1, price_r2, price_r3 ,id_sync, ultimate_sync) VALUES ( ?, ?, ?, ?, ?, ?, ?)', [rabbit.round_id, rabbit.option, rabbit.price_r1, rabbit.price_r2, rabbit.price_r3, rabbit.id_sync, rabbit.ultimate_sync]).then(([tx, results]) => {
+                        resolve(results);
+                    });
+                }).then((result) => {
+                    // this.closeDatabase(db);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        });
+    }
+
+    addRabbitPlayer(rabbitPlayers) {
+        return new Promise((resolve) => {
+            this.initDB().then((db) => {
+                db.transaction((tx) => {
+                    rabbitPlayers.forEach(player => {
+                        tx.executeSql('INSERT INTO rabbit_players(bet_rabbit_id, member_id, id_sync, ultimate_sync) VALUES ( ?, ?, ?, ?)', [player.bet_rabbit_id, player.member_id, player.id_sync, player.ultimate_sync]).then(([tx, results]) => {
+                        });
+                    });
+                }).then((result) => {
+                    resolve(result);
                 }).catch((err) => {
                     console.log(err);
                 });

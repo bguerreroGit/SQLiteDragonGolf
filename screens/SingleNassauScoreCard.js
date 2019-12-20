@@ -389,25 +389,19 @@ class ScoreCardScreen extends Component {
                                 return (
                                     <View style={{ borderWidth: 1, borderColor: 'back', width: 25, height: 100, margin: 1 }}>
                                         {
-                                            front9Presses.map((press) => {
-                                                if(press[index]==null){
+                                            front9Presses.map((press, j) => {
+                                                let indexOfCero = null;
+                                                if (press[index] == null) {
                                                     return null;
                                                 }
-                                                if(press[index]==0){
-                                                    if(press[index-1]==null){
-                                                        auxLastIndex=0;
-                                                        auxLastIndex = press.slice(0, index).reverse().findIndex(element => element != null);
-                                                        if(auxLastIndex!=-1){
-                                                            return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
-                                                        }else 
-                                                            return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
-                                                    }else {
-                                                        return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
+                                                if (press[index] == 0) {
+                                                    indexOfCero = press.indexOf(0);
+                                                    if (j > 0 && indexOfCero == index) {
+                                                        return null
+                                                    } else {
+                                                        return (<Text style={{ fontSize: 8, textAlign: 'center' }}> = </Text>)
                                                     }
-                                                    if (press[index - 1] == 0) {
-                                                        return (<Text style={{ fontSize: 8, textAlign: 'center' }}>=</Text>)
-                                                    } 
-                                                }
+                                                }    
                                                 else if(press[index]<0){
                                                     return (<Text style={{ fontSize: 8, textAlign: 'center', color: 'red'}}>{press[index]}</Text>)
                                                 }else {

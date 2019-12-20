@@ -242,7 +242,9 @@ export default class SingleBetComponet extends Component {
         let match=0;
         let strokes_b = 0;
         let advIndex = 0;
-        let auxPressesArray = [];
+        let auxPressesArray = [
+            [null, null, null, null, null, null, null, null, null],
+        ];
         let indexPress = 0;
         for (let index = 0; index < 9; index++) {
             if (back9_a[index].strokes == null) {
@@ -269,14 +271,20 @@ export default class SingleBetComponet extends Component {
                 ////// end calculo del match
                 console.log('=================== STROKES JUGADOR B ===============');
                 console.log(' -Golpes total: ' + strokes_b);
-                if (auxPressesArray.length == 0) {
-                    auxPressesArray.push(back9Presses);
+                if (auxPressesArray.length == 1) {
+                    //auxPressesArray.push(back9Presses);
                     if (strokes_a < strokes_b) {
                         auxPressesArray[0][index] = 1;
                     } else if (strokes_b < strokes_a) {
                         auxPressesArray[0][index] = -1;
                     } else {
                         auxPressesArray[0][index] = 0;
+                    }
+                    if (auxPressesArray[0][index] != 0 && (auxPressesArray[0][index]) % bet.automatic_press_every == 0) {
+                        console.log('========================== SE ABRE LA PRIMER PRESION ========================');
+                        indexPress += 1;
+                        back9Presses[index] = 0;
+                        auxPressesArray.push(back9Presses);
                     }
                 } else {
                     if (strokes_a < strokes_b) {
